@@ -1,3 +1,33 @@
+02.05.2004
+    Release 1.0.0
+
+22.04.2004:
+    Changed: Makefiles on Linux are now derived from qmake. However,
+        the provided Makefiles should work directly without using
+        qmake, it is best to stick with them.
+
+22.04.2004: 
+    Changed: Compile a shared library on Linux now
+	
+08.04.2004:
+    Changed: When possible use GL_TEXTURE_RECTANGLE_NV texture format
+        even if GL_TEXTURE_2D would work also. The former appears to be
+        faster. 
+
+29.03.2004
+    Changed: Scissoring area was chosen too big, because I had 
+        confused width/height with right/top margin. This is fixed
+        now, resulting in better performance for some models
+
+25.03.2004
+    Added: Area structs for pixel and normalized device coordinates. 
+        Used to speed up depth complexity sampling by restricting 
+        readback to smaller Area
+    Added: Check whether primitive vector is empty
+
+24.03.2004
+    Changed: Hided occlusion query implementations in cpp
+        Renamed OcclusionQueryAdapter to OcclusionQuery
 
 02.03.2004
     Release 0.9.2
@@ -39,3 +69,4 @@
 
 23.09.2003: 
     Release 0.9
+

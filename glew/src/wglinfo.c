@@ -61,8 +61,8 @@ VisualInfoARB (HDC hDC, int verbose)
   attrib[5] = WGL_DOUBLE_BUFFER_ARB;
   attrib[6] = WGL_STEREO_ARB;
   attrib[7] = WGL_PIXEL_TYPE_ARB;
-  /* WGL_TYPE_RGBA_ARB, WGL_TYPE_COLORINDEX_ARB, WGL_TYPE_RGBA_FLOAT_ATI
-     (WGL_ATI_pixel_format_float) */
+  /* WGL_TYPE_RGBA_ARB, WGL_TYPE_COLORINDEX_ARB,
+     WGL_TYPE_RGBA_FLOAT_ATI (WGL_ATI_pixel_format_float) */
   /* Color buffer information */
   attrib[8] = WGL_COLOR_BITS_ARB;
   attrib[9] = WGL_RED_BITS_ARB;
@@ -83,7 +83,9 @@ VisualInfoARB (HDC hDC, int verbose)
   attrib[21] = WGL_NUMBER_OVERLAYS_ARB;
   attrib[22] = WGL_NUMBER_UNDERLAYS_ARB;
   attrib[23] = WGL_SWAP_LAYER_BUFFERS_ARB;
-  n_attrib = 24;
+  attrib[24] = WGL_SAMPLES_ARB;
+  attrib[25] = WGL_SUPPORT_GDI_ARB;
+  n_attrib = 26;
   if (WGLEW_ARB_pbuffer)
   {
     attrib[n_attrib] = WGL_DRAW_TO_PBUFFER_ARB;
@@ -100,11 +102,10 @@ VisualInfoARB (HDC hDC, int verbose)
   if (!verbose)
   {
     /* print table header */
-    fprintf(file, " +-----+-------------------+-----------------+----------+-----------------+----------+\n");
-    fprintf(file, " |     |     visual        |      color      | ax dp st |      accum      |   layer  |\n");
-    fprintf(file, " |  id | tp ac fm db sw st |  sz  r  g  b  a | bf th cl |  sz  r  g  b  a | ov un sw |\n");
-    fprintf(file, " +-----+-------------------+-----------------+----------+-----------------+----------+\n");
-
+    fprintf(file, " +-----+-------------------------+-----------------+----------+-----------------+----------+\n");
+    fprintf(file, " |     |          visual         |      color      | ax dp st |      accum      |   layer  |\n");
+    fprintf(file, " |  id | tp ac gd fm db sw st ms |  sz  r  g  b  a | bf th cl |  sz  r  g  b  a | ov un sw |\n");
+    fprintf(file, " +-----+-------------------------+-----------------+----------+-----------------+----------+\n");
     /* loop through all the pixel formats */
     for(i = 1; i <= maxpf; i++)
     {
@@ -131,14 +132,16 @@ VisualInfoARB (HDC hDC, int verbose)
 	else if (WGLEW_ARB_pbuffer && value[n_pbuffer]) fprintf(file, "pb ");
       }
       /* acceleration */
-      fprintf(file, "%s", value[3] == WGL_FULL_ACCELERATION_ARB ? "fu" : 
+      fprintf(file, "%s ", value[3] == WGL_FULL_ACCELERATION_ARB ? "fu" : 
 	      value[3] == WGL_GENERIC_ACCELERATION_ARB ? "ge" :
 	      value[3] == WGL_NO_ACCELERATION_ARB ? "no" : ". ");
+      /* gdi support */
+      fprintf(file, " %c ", value[25] ? 'y' : '.');
       /* format */
-      if (WGLEW_NV_float_buffer && value[n_float]) fprintf(file, "  f ");
-      else if (WGLEW_ATI_pixel_format_float && value[7] == WGL_TYPE_RGBA_FLOAT_ATI) fprintf(file, "  f ");
-      else if (value[7] == WGL_TYPE_RGBA_ARB) fprintf(file, "  i ");
-      else if (value[7] == WGL_TYPE_COLORINDEX_ARB) fprintf(file, "  c ");
+      if (WGLEW_NV_float_buffer && value[n_float]) fprintf(file, " f ");
+      else if (WGLEW_ATI_pixel_format_float && value[7] == WGL_TYPE_RGBA_FLOAT_ATI) fprintf(file, " f ");
+      else if (value[7] == WGL_TYPE_RGBA_ARB) fprintf(file, " i ");
+      else if (value[7] == WGL_TYPE_COLORINDEX_ARB) fprintf(file, " c ");
       /* double buffer */
       fprintf(file, " %c ", value[5] ? 'y' : '.');
       /* swap method */
@@ -147,7 +150,12 @@ VisualInfoARB (HDC hDC, int verbose)
       else if (value[4] == WGL_SWAP_UNDEFINED_ARB) fprintf(file, " . ");
       else fprintf(file, " . ");
       /* stereo */
-      fprintf(file, " %c | ", value[6] ? 'y' : '.');
+      fprintf(file, " %c ", value[6] ? 'y' : '.');
+      /* multisample */
+      if (value[24] > 0)
+	fprintf(file, " %d | ", value[24]);
+      else
+	fprintf(file, " . | ", value[24]);
       /* color size */
       if (value[8]) fprintf(file, "%3d ", value[8]);
       else fprintf(file, "  . ");
@@ -199,10 +207,10 @@ VisualInfoARB (HDC hDC, int verbose)
       fprintf(file, "|\n");
     }
     /* print table footer */
-    fprintf(file, " +-----+-------------------+-----------------+----------+-----------------+----------+\n");
-    fprintf(file, " |     |     visual        |      color      | ax dp st |      accum      |   layer  |\n");
-    fprintf(file, " |  id | tp ac fm db sw st |  sz  r  g  b  a | bf th cl |  sz  r  g  b  a | ov un sw |\n");
-    fprintf(file, " +-----+-------------------+-----------------+----------+-----------------+----------+\n");
+    fprintf(file, " +-----+-------------------------+-----------------+----------+-----------------+----------+\n");
+    fprintf(file, " |     |          visual         |      color      | ax dp st |      accum      |   layer  |\n");
+    fprintf(file, " |  id | tp ac gd fm db sw st ms |  sz  r  g  b  a | bf th cl |  sz  r  g  b  a | ov un sw |\n");
+    fprintf(file, " +-----+-------------------------+-----------------+----------+-----------------+----------+\n");
   }
   else /* verbose */
   {

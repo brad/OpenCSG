@@ -26,7 +26,7 @@
 #include "opencsgRender.h"
 #include "batch.h"
 #include "channelManager.h"
-#include "occlusionQueryAdapter.h"
+#include "occlusionQuery.h"
 #include "openglHelper.h"
 #include "primitiveHelper.h"
 #include "scissorMemo.h"
@@ -260,6 +260,7 @@ namespace OpenCSG {
         Batcher batches(primitives);
 
         scissor->setIntersected(primitives);
+
         for (std::vector<Batch>::const_iterator itr = batches.begin(); itr != batches.end(); ++itr) {
             unsigned int maxConvexity = Algo::getConvexity(*itr);
             for (unsigned int currentLayer = 0; currentLayer < maxConvexity; ++currentLayer) {
@@ -310,7 +311,7 @@ namespace OpenCSG {
         }
 
         channelMgr->free();
-       
+        
         delete scissor;
         delete channelMgr;
     }
@@ -325,7 +326,7 @@ namespace OpenCSG {
         scissor->setIntersected(primitives);
         scissor->setCurrent(primitives);
 
-        OpenGL::OcclusionQueryAdapter* occlusionTest = 0;
+        OpenGL::OcclusionQuery* occlusionTest = 0;
 
         while (true) {
             if (channelMgr->request() == NoChannel) {
@@ -389,7 +390,7 @@ namespace OpenCSG {
         scissor->enable();
 
         glClear(GL_STENCIL_BUFFER_BIT);
-        unsigned int depthComplexity = OpenGL::calcMaxDepthComplexity(primitives);
+        unsigned int depthComplexity = OpenGL::calcMaxDepthComplexity(primitives, scissor->getIntersectedArea());
 
         scissor->disable();
 

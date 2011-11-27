@@ -26,7 +26,7 @@
 #include "opencsgRender.h"
 #include "batch.h"
 #include "channelManager.h"
-#include "occlusionQueryAdapter.h"
+#include "occlusionQuery.h"
 #include "openglHelper.h"
 #include "primitiveHelper.h"
 #include "scissorMemo.h"
@@ -255,7 +255,7 @@ namespace OpenCSG {
             glEnable(GL_STENCIL_TEST);
             glEnable(GL_CULL_FACE);
 
-            OpenGL::OcclusionQueryAdapter* occlusionTest = OpenGL::getOcclusionQuery();
+            OpenGL::OcclusionQuery* occlusionTest = OpenGL::getOcclusionQuery();
 
             std::vector<unsigned int> fragmentcount(numberOfBatches, 0);
 
@@ -377,14 +377,18 @@ namespace OpenCSG {
         }
 
         Batcher subtractedBatches(subtracted);
-        unsigned int depthComplexity = 0;
-        if (algorithm == DepthComplexitySampling) {
-            glClear(GL_STENCIL_BUFFER_BIT);
-            depthComplexity = std::min(OpenGL::calcMaxDepthComplexity(subtracted), subtractedBatches.size());
-        }
 
         scissor->setIntersected(intersected);
         scissor->setCurrent(intersected);
+
+        unsigned int depthComplexity = 0;
+        if (algorithm == DepthComplexitySampling) {
+            scissor->enable();
+            glClear(GL_STENCIL_BUFFER_BIT);
+            depthComplexity = 
+                std::min(OpenGL::calcMaxDepthComplexity(subtracted, scissor->getCurrentArea()), 
+                         subtractedBatches.size());
+        }
 
         channelMgr->request();
         channelMgr->renderToChannel(true);

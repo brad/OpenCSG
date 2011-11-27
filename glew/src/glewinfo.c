@@ -448,6 +448,17 @@ static void _glewInfo_GL_ARB_fragment_program (void)
 
 #endif /* GL_ARB_fragment_program */
 
+/* --------------------- GL_ARB_fragment_program_shadow -------------------- */
+
+#ifdef GL_ARB_fragment_program_shadow
+
+static void _glewInfo_GL_ARB_fragment_program_shadow (void)
+{
+  glewPrintExt("GL_ARB_fragment_program_shadow", GLEW_ARB_fragment_program_shadow, glewGetExtension("GL_ARB_fragment_program_shadow"));
+}
+
+#endif /* GL_ARB_fragment_program_shadow */
+
 /* ------------------------- GL_ARB_fragment_shader ------------------------ */
 
 #ifdef GL_ARB_fragment_shader
@@ -4768,6 +4779,9 @@ static void glewInfo (void)
 #ifdef GL_ARB_fragment_program
   _glewInfo_GL_ARB_fragment_program();
 #endif /* GL_ARB_fragment_program */
+#ifdef GL_ARB_fragment_program_shadow
+  _glewInfo_GL_ARB_fragment_program_shadow();
+#endif /* GL_ARB_fragment_program_shadow */
 #ifdef GL_ARB_fragment_shader
   _glewInfo_GL_ARB_fragment_shader();
 #endif /* GL_ARB_fragment_shader */

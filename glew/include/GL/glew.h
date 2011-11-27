@@ -1884,6 +1884,15 @@ typedef void (GLAPIENTRY * PFNGLVERTEXARRAYRANGEAPPLEPROC) (GLsizei length, void
 
 #endif /* GL_ARB_fragment_program */
 
+/* --------------------- GL_ARB_fragment_program_shadow -------------------- */
+
+#ifndef GL_ARB_fragment_program_shadow
+#define GL_ARB_fragment_program_shadow 1
+
+#define GLEW_ARB_fragment_program_shadow GLEW_GET_VAR(__GLEW_ARB_fragment_program_shadow)
+
+#endif /* GL_ARB_fragment_program_shadow */
+
 /* ------------------------- GL_ARB_fragment_shader ------------------------ */
 
 #ifndef GL_ARB_fragment_shader
@@ -2298,6 +2307,9 @@ typedef void (GLAPIENTRY * PFNGLPOINTPARAMETERFVARBPROC) (GLenum pname, GLfloat*
 #define GL_FLOAT_VEC2_ARB 0x8B50
 #define GL_FLOAT_VEC3_ARB 0x8B51
 #define GL_FLOAT_VEC4_ARB 0x8B52
+#define GL_INT_VEC2_ARB 0x8B53
+#define GL_INT_VEC3_ARB 0x8B54
+#define GL_INT_VEC4_ARB 0x8B55
 #define GL_BOOL_ARB 0x8B56
 #define GL_BOOL_VEC2_ARB 0x8B57
 #define GL_BOOL_VEC3_ARB 0x8B58
@@ -8556,6 +8568,7 @@ GLEW_EXPORT GLboolean __GLEW_APPLE_vertex_array_range;
 GLEW_EXPORT GLboolean __GLEW_APPLE_ycbcr_422;
 GLEW_EXPORT GLboolean __GLEW_ARB_depth_texture;
 GLEW_EXPORT GLboolean __GLEW_ARB_fragment_program;
+GLEW_EXPORT GLboolean __GLEW_ARB_fragment_program_shadow;
 GLEW_EXPORT GLboolean __GLEW_ARB_fragment_shader;
 GLEW_EXPORT GLboolean __GLEW_ARB_imaging;
 GLEW_EXPORT GLboolean __GLEW_ARB_matrix_palette;
