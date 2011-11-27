@@ -81,6 +81,15 @@ namespace OpenCSG {
         glGetFloatv(GL_PROJECTION_MATRIX, OpenGL::projection);
         glGetIntegerv(GL_VIEWPORT, OpenGL::canvasPos);
 
+        if (glIsEnabled(GL_SCISSOR_TEST)) {
+            glGetIntegerv(GL_SCISSOR_BOX, OpenGL::scissorPos);
+        } else {
+            OpenGL::scissorPos[0] = OpenGL::canvasPos[0];
+            OpenGL::scissorPos[1] = OpenGL::canvasPos[1];
+            OpenGL::scissorPos[2] = OpenGL::canvasPos[2];
+            OpenGL::scissorPos[3] = OpenGL::canvasPos[3];
+        }
+
         const int dx = OpenGL::canvasPos[2] - OpenGL::canvasPos[0];
         const int dy = OpenGL::canvasPos[3] - OpenGL::canvasPos[1];
 
@@ -91,15 +100,6 @@ namespace OpenCSG {
             tx = nextPow2(dx);
             ty = nextPow2(dy);
         }
-
-        // to be on the safe side: copy to texture always works (if we have pbuffer at all)
-        static RenderTexture::UpdateMode updateMode = RenderTexture::RT_COPY_TO_TEXTURE;
-#ifdef _WIN32
-        if (WGLEW_ARB_render_texture) {
-            // but render to texture is better :-)
-            updateMode = RenderTexture::RT_RENDER_TO_TEXTURE;
-        }
-#endif
 
         // these variables are for a heuristic that makes the pbuffer smaller
         // if the size of the pbuffer has been bigger than necessary in 
@@ -120,14 +120,19 @@ namespace OpenCSG {
 
         bool rebuild = false;
         if (pbuffer_ == 0) {
-            pbuffer_ = new RenderTexture(tx, ty);
+        
+            if (GLEW_NV_texture_rectangle) {
+                pbuffer_ = new RenderTexture("rgba texRECT depth=24 stencil=8 single");
+            } else {
+                pbuffer_ = new RenderTexture("rgba tex2D depth=24 stencil=8 single");
+            }
             rebuild = true;
         // tx == ty == 0 happens if the window is minimized, in this case don't touch a thing
         } else if (tx != 0 && ty != 0) {
             
             // check whether the pbuffer is too small, in case resize immediately
             if ((tx > pbuffer_->GetWidth()) || (ty > pbuffer_->GetHeight())) {
-                pbuffer_->Reset(std::max(maxPBufferSizeX, tx), std::max(maxPBufferSizeY, ty));
+                pbuffer_->Resize(std::max(maxPBufferSizeX, tx), std::max(maxPBufferSizeY, ty));
                 rebuild = true;
             }           
 
@@ -159,7 +164,7 @@ namespace OpenCSG {
                 if (maxPBufferSizeX != pbuffer_->GetWidth() || maxPBufferSizeY != pbuffer_->GetHeight()) {
                     // a beautiful algorithm would ensure that this inner if-condition 
                     // would always be fulfilled.  
-                    pbuffer_->Reset(maxPBufferSizeX, maxPBufferSizeY);
+                    pbuffer_->Resize(maxPBufferSizeX, maxPBufferSizeY);
                     rebuild = true;
                 }
                 resizePBufferCounterX = 0;
@@ -171,7 +176,8 @@ namespace OpenCSG {
         }
 
         if (rebuild) {
-            if (!pbuffer_->Initialize(true, true, true, false, false, 8, 8, 8, 8, updateMode)) {
+            // should not be required after Resize() - but in practice I get errors (20.07.2004, Quadro FX500, 61.40)
+            if (!pbuffer_->Initialize(tx, ty, true, false)) {
                 assert(0);
             }
 

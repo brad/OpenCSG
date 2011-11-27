@@ -32,7 +32,7 @@ GLEW_DEST ?= /usr
 
 GLEW_MAJOR = 1
 GLEW_MINOR = 2
-GLEW_MICRO = 1
+GLEW_MICRO = 4
 GLEW_VERSION = $(GLEW_MAJOR).$(GLEW_MINOR).$(GLEW_MICRO)
 
 TARDIR = ../glew-$(GLEW_VERSION)
@@ -49,6 +49,9 @@ NAME = glew32
 CC = gcc -mno-cygwin
 LD = ld
 CFLAGS.EXTRA = -DGLEW_STATIC
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA += -DGLEW_MX
+endif
 LDFLAGS.SO = -shared -soname $(LIB.SONAME)
 LDFLAGS.GL = -lglu32 -lopengl32 -lgdi32 -luser32 -lkernel32
 LDFLAGS.EXTRA =
@@ -69,7 +72,9 @@ NAME = glew32
 CC = gcc
 # use gcc for linking, with ld it does not work
 LD = gcc
-CFLAGS.EXTRA =
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA = -DGLEW_MX
+endif
 CFLAGS.SO = -DGLEW_BUILD
 #LDFLAGS.SO = -shared -soname $(LIB.SONAME) --out-implib lib/$(LIB.DEVLNK)
 LDFLAGS.SO = -shared -Wl,-soname,$(LIB.SONAME) -Wl,--out-implib,lib/$(LIB.DEVLNK)
@@ -91,10 +96,14 @@ ifeq ($(patsubst Linux%,Linux,$(SYSTEM)), Linux)
 NAME = GLEW
 CC = cc
 LD = ld
-CFLAGS.EXTRA = 
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA = -DGLEW_MX
+endif
 LDFLAGS.SO = -shared -soname $(LIB.SONAME)
 LDFLAGS.EXTRA = -L/usr/X11R6/lib
 LDFLAGS.GL = -lXmu -lXi -lGLU -lGL -lXext -lX11
+LDFLAGS.STATIC = -Wl,-Bstatic
+LDFLAGS.DYNAMIC = -Wl,-Bdynamic
 NAME = GLEW
 WARN = -Wall -W
 POPT = -O2
@@ -115,10 +124,12 @@ LD = ld
 ABI = -64# -n32
 CC += $(ABI)
 LD += $(ABI)
-CFLAGS.EXTRA =
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA = -DGLEW_MX
+endif
 LDFLAGS.SO = -shared -soname $(LIB.SONAME)
 LDFLAGS.EXTRA =
-LDFLAGS.GL = -lGL -lXext -lX11
+LDFLAGS.GL = -lGLU -lGL -lXext -lX11
 NAME = GLEW
 WARN = -fullwarn -woff 1110,1498
 POPT = -O2
@@ -137,6 +148,9 @@ NAME = GLEW
 CC = cc
 LD = cc
 CFLAGS.EXTRA = -no-cpp-precomp -dynamic -fno-common
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA += -DGLEW_MX
+endif
 LDFLAGS.SO = -dynamiclib -install_name $(GLEW_DEST)/lib/$(LIB.SHARED)
 LDFLAGS.EXTRA =
 ifneq (undefined, $(origin GLEW_APPLE_GLX))
@@ -163,7 +177,10 @@ NAME = GLEW
 CC = cc
 LD = ld
 CFLAGS.EXTRA = -I/usr/openwin/include
-LDFLAGS.SO = -shared
+ifneq (undefined, $(origin GLEW_MX))
+CFLAGS.EXTRA += -DGLEW_MX
+endif
+LDFLAGS.SO = -G
 LDFLAGS.EXTRA = -L/usr/openwin/lib
 LDFLAGS.GL = -lXmu -lXi -lGLU -lGL -lXext -lX11
 NAME = GLEW
@@ -202,12 +219,15 @@ LIB.OBJS = $(LIB.SRCS:.c=.o)
 LIB.LDFLAGS = $(LDFLAGS.EXTRA) $(LDFLAGS.GL)
 LIB.LIBS = $(GL_LDFLAGS)
 
-BIN = glewinfo$(BIN.SUFFIX)
-BIN.SRCS = src/glewinfo.c
-BIN.OBJS = $(BIN.SRCS:.c=.o)
-BIN.LIBS = -Llib -l$(NAME) $(LDFLAGS.EXTRA) $(LDFLAGS.GL)
+GLEWINFO.BIN = glewinfo$(BIN.SUFFIX)
+GLEWINFO.BIN.SRCS = src/glewinfo.c
+GLEWINFO.BIN.OBJS = $(GLEWINFO_BIN.SRCS:.c=.o)
+VISUALINFO.BIN = visualinfo$(BIN.SUFFIX)
+VISUALINFO.BIN.SRCS = src/visualinfo.c
+VISUALINFO.BIN.OBJS = $(VISUALINFO_BIN.SRCS:.c=.o)
+BIN.LIBS = -Llib $(LDFLAGS.STATIC) -l$(NAME) $(LDFLAGS.EXTRA) $(LDFLAGS.DYNAMIC) $(LDFLAGS.GL)
 
-all debug: lib/$(LIB.SHARED) lib/$(LIB.STATIC) bin/$(BIN)
+all debug: lib/$(LIB.SHARED) lib/$(LIB.STATIC) bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN)
 
 lib:
 	mkdir lib
@@ -223,7 +243,10 @@ else
 	$(LN) $(LIB.SHARED) lib/$(LIB.DEVLNK)
 endif
 
-bin/$(BIN): $(BIN.SRCS)
+bin/$(GLEWINFO.BIN): $(GLEWINFO.BIN.SRCS)
+	$(CC) $(CFLAGS) -o $@ $^ $(BIN.LIBS)
+
+bin/$(VISUALINFO.BIN): $(VISUALINFO.BIN.SRCS)
 	$(CC) $(CFLAGS) -o $@ $^ $(BIN.LIBS)
 
 %.o: %.c
@@ -267,7 +290,7 @@ else
   endif
 endif
 # utilities
-	$(INSTALL) -s -m 0755 bin/$(BIN) $(GLEW_DEST)/bin/
+	$(INSTALL) -s -m 0755 bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) $(GLEW_DEST)/bin/
 
 uninstall:
 	$(RM) $(GLEW_DEST)/include/GL/wglew.h
@@ -281,12 +304,12 @@ else
 	$(RM) $(GLEW_DEST)/lib/$(LIB.SHARED)
 	$(RM) $(GLEW_DEST)/lib/$(LIB.STATIC)
 endif
-	$(RM) $(GLEW_DEST)/bin/$(BIN)
+	$(RM) $(GLEW_DEST)/bin/$(GLEWINFO.BIN) $(GLEW_DEST)/bin/$(VISUALINFO.BIN)
 
 clean:
 	$(RM) $(LIB.OBJS)
 	$(RM) lib/$(LIB.STATIC) lib/$(LIB.SHARED) lib/$(LIB.DEVLNK) lib/$(LIB.SONAME) $(LIB.STATIC)
-	$(RM) $(BIN.OBJS) bin/$(BIN)
+	$(RM) $(GLEWINFO.BIN.OBJS) bin/$(GLEWINFO.BIN) $(VISUALINFO.BIN.OBJS) bin/$(VISUALINFO.BIN)
 # Compiler droppings
 	$(RM) so_locations
 

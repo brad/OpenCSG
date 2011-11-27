@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="glew_static"
+	ProjectGUID="{1FCB38A3-3BCB-4BA5-95A8-AD7DFD109D9A}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>

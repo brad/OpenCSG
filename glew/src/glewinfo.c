@@ -41,6 +41,18 @@
 
 static FILE* f;
 
+#ifdef GLEW_MX
+GLEWContext _glewctx;
+#define glewGetContext() (&_glewctx)
+#ifdef _WIN32
+WGLEWContext _wglewctx;
+#define wglewGetContext() (&_wglewctx)
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+GLXEWContext _glxewctx;
+#define glxewGetContext() (&_glxewctx)
+#endif
+#endif
+
 #if defined(_WIN32)
 GLboolean glewCreateContext (int* pixelformat);
 #elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
@@ -437,6 +449,19 @@ static void _glewInfo_GL_ARB_depth_texture (void)
 
 #endif /* GL_ARB_depth_texture */
 
+/* -------------------------- GL_ARB_draw_buffers -------------------------- */
+
+#ifdef GL_ARB_draw_buffers
+
+static void _glewInfo_GL_ARB_draw_buffers (void)
+{
+  glewPrintExt("GL_ARB_draw_buffers", GLEW_ARB_draw_buffers, glewGetExtension("GL_ARB_draw_buffers"));
+
+  glewInfoFunc("glDrawBuffersARB", glDrawBuffersARB == NULL);
+}
+
+#endif /* GL_ARB_draw_buffers */
+
 /* ------------------------ GL_ARB_fragment_program ------------------------ */
 
 #ifdef GL_ARB_fragment_program
@@ -825,6 +850,17 @@ static void _glewInfo_GL_ARB_texture_non_power_of_two (void)
 }
 
 #endif /* GL_ARB_texture_non_power_of_two */
+
+/* ------------------------ GL_ARB_texture_rectangle ----------------------- */
+
+#ifdef GL_ARB_texture_rectangle
+
+static void _glewInfo_GL_ARB_texture_rectangle (void)
+{
+  glewPrintExt("GL_ARB_texture_rectangle", GLEW_ARB_texture_rectangle, glewGetExtension("GL_ARB_texture_rectangle"));
+}
+
+#endif /* GL_ARB_texture_rectangle */
 
 /* ------------------------ GL_ARB_transpose_matrix ------------------------ */
 
@@ -1736,6 +1772,17 @@ static void _glewInfo_GL_EXT_paletted_texture (void)
 
 #endif /* GL_EXT_paletted_texture */
 
+/* ----------------------- GL_EXT_pixel_buffer_object ---------------------- */
+
+#ifdef GL_EXT_pixel_buffer_object
+
+static void _glewInfo_GL_EXT_pixel_buffer_object (void)
+{
+  glewPrintExt("GL_EXT_pixel_buffer_object", GLEW_EXT_pixel_buffer_object, glewGetExtension("GL_EXT_pixel_buffer_object"));
+}
+
+#endif /* GL_EXT_pixel_buffer_object */
+
 /* ------------------------- GL_EXT_pixel_transform ------------------------ */
 
 #ifdef GL_EXT_pixel_transform
@@ -2469,23 +2516,6 @@ static void _glewInfo_GL_NV_depth_clamp (void)
 
 #endif /* GL_NV_depth_clamp */
 
-/* -------------------------- GL_NV_element_array -------------------------- */
-
-#ifdef GL_NV_element_array
-
-static void _glewInfo_GL_NV_element_array (void)
-{
-  glewPrintExt("GL_NV_element_array", GLEW_NV_element_array, glewGetExtension("GL_NV_element_array"));
-
-  glewInfoFunc("glDrawElementArrayNV", glDrawElementArrayNV == NULL);
-  glewInfoFunc("glDrawRangeElementArrayNV", glDrawRangeElementArrayNV == NULL);
-  glewInfoFunc("glElementPointerNV", glElementPointerNV == NULL);
-  glewInfoFunc("glMultiDrawElementArrayNV", glMultiDrawElementArrayNV == NULL);
-  glewInfoFunc("glMultiDrawRangeElementArrayNV", glMultiDrawRangeElementArrayNV == NULL);
-}
-
-#endif /* GL_NV_element_array */
-
 /* ---------------------------- GL_NV_evaluators --------------------------- */
 
 #ifdef GL_NV_evaluators
@@ -2565,6 +2595,28 @@ static void _glewInfo_GL_NV_fragment_program (void)
 }
 
 #endif /* GL_NV_fragment_program */
+
+/* ------------------------ GL_NV_fragment_program2 ------------------------ */
+
+#ifdef GL_NV_fragment_program2
+
+static void _glewInfo_GL_NV_fragment_program2 (void)
+{
+  glewPrintExt("GL_NV_fragment_program2", GLEW_NV_fragment_program2, glewGetExtension("GL_NV_fragment_program2"));
+}
+
+#endif /* GL_NV_fragment_program2 */
+
+/* --------------------- GL_NV_fragment_program_option --------------------- */
+
+#ifdef GL_NV_fragment_program_option
+
+static void _glewInfo_GL_NV_fragment_program_option (void)
+{
+  glewPrintExt("GL_NV_fragment_program_option", GLEW_NV_fragment_program_option, glewGetExtension("GL_NV_fragment_program_option"));
+}
+
+#endif /* GL_NV_fragment_program_option */
 
 /* ---------------------------- GL_NV_half_float --------------------------- */
 
@@ -2978,6 +3030,28 @@ static void _glewInfo_GL_NV_vertex_program2 (void)
 }
 
 #endif /* GL_NV_vertex_program2 */
+
+/* ---------------------- GL_NV_vertex_program2_option --------------------- */
+
+#ifdef GL_NV_vertex_program2_option
+
+static void _glewInfo_GL_NV_vertex_program2_option (void)
+{
+  glewPrintExt("GL_NV_vertex_program2_option", GLEW_NV_vertex_program2_option, glewGetExtension("GL_NV_vertex_program2_option"));
+}
+
+#endif /* GL_NV_vertex_program2_option */
+
+/* ------------------------- GL_NV_vertex_program3 ------------------------- */
+
+#ifdef GL_NV_vertex_program3
+
+static void _glewInfo_GL_NV_vertex_program3 (void)
+{
+  glewPrintExt("GL_NV_vertex_program3", GLEW_NV_vertex_program3, glewGetExtension("GL_NV_vertex_program3"));
+}
+
+#endif /* GL_NV_vertex_program3 */
 
 /* ---------------------------- GL_OML_interlace --------------------------- */
 
@@ -4392,6 +4466,19 @@ static void _glewInfo_GLX_EXT_visual_rating (void)
 
 #endif /* GLX_EXT_visual_rating */
 
+/* -------------------------- GLX_MESA_agp_offset -------------------------- */
+
+#ifdef GLX_MESA_agp_offset
+
+static void _glewInfo_GLX_MESA_agp_offset (void)
+{
+  glewPrintExt("GLX_MESA_agp_offset", GLXEW_MESA_agp_offset, glxewGetExtension("GLX_MESA_agp_offset"));
+
+  glewInfoFunc("glXGetAGPOffsetMESA", glXGetAGPOffsetMESA == NULL);
+}
+
+#endif /* GLX_MESA_agp_offset */
+
 /* ------------------------ GLX_MESA_copy_sub_buffer ----------------------- */
 
 #ifdef GLX_MESA_copy_sub_buffer
@@ -4776,6 +4863,9 @@ static void glewInfo (void)
 #ifdef GL_ARB_depth_texture
   _glewInfo_GL_ARB_depth_texture();
 #endif /* GL_ARB_depth_texture */
+#ifdef GL_ARB_draw_buffers
+  _glewInfo_GL_ARB_draw_buffers();
+#endif /* GL_ARB_draw_buffers */
 #ifdef GL_ARB_fragment_program
   _glewInfo_GL_ARB_fragment_program();
 #endif /* GL_ARB_fragment_program */
@@ -4845,6 +4935,9 @@ static void glewInfo (void)
 #ifdef GL_ARB_texture_non_power_of_two
   _glewInfo_GL_ARB_texture_non_power_of_two();
 #endif /* GL_ARB_texture_non_power_of_two */
+#ifdef GL_ARB_texture_rectangle
+  _glewInfo_GL_ARB_texture_rectangle();
+#endif /* GL_ARB_texture_rectangle */
 #ifdef GL_ARB_transpose_matrix
   _glewInfo_GL_ARB_transpose_matrix();
 #endif /* GL_ARB_transpose_matrix */
@@ -5013,6 +5106,9 @@ static void glewInfo (void)
 #ifdef GL_EXT_paletted_texture
   _glewInfo_GL_EXT_paletted_texture();
 #endif /* GL_EXT_paletted_texture */
+#ifdef GL_EXT_pixel_buffer_object
+  _glewInfo_GL_EXT_pixel_buffer_object();
+#endif /* GL_EXT_pixel_buffer_object */
 #ifdef GL_EXT_pixel_transform
   _glewInfo_GL_EXT_pixel_transform();
 #endif /* GL_EXT_pixel_transform */
@@ -5169,9 +5265,6 @@ static void glewInfo (void)
 #ifdef GL_NV_depth_clamp
   _glewInfo_GL_NV_depth_clamp();
 #endif /* GL_NV_depth_clamp */
-#ifdef GL_NV_element_array
-  _glewInfo_GL_NV_element_array();
-#endif /* GL_NV_element_array */
 #ifdef GL_NV_evaluators
   _glewInfo_GL_NV_evaluators();
 #endif /* GL_NV_evaluators */
@@ -5187,6 +5280,12 @@ static void glewInfo (void)
 #ifdef GL_NV_fragment_program
   _glewInfo_GL_NV_fragment_program();
 #endif /* GL_NV_fragment_program */
+#ifdef GL_NV_fragment_program2
+  _glewInfo_GL_NV_fragment_program2();
+#endif /* GL_NV_fragment_program2 */
+#ifdef GL_NV_fragment_program_option
+  _glewInfo_GL_NV_fragment_program_option();
+#endif /* GL_NV_fragment_program_option */
 #ifdef GL_NV_half_float
   _glewInfo_GL_NV_half_float();
 #endif /* GL_NV_half_float */
@@ -5259,6 +5358,12 @@ static void glewInfo (void)
 #ifdef GL_NV_vertex_program2
   _glewInfo_GL_NV_vertex_program2();
 #endif /* GL_NV_vertex_program2 */
+#ifdef GL_NV_vertex_program2_option
+  _glewInfo_GL_NV_vertex_program2_option();
+#endif /* GL_NV_vertex_program2_option */
+#ifdef GL_NV_vertex_program3
+  _glewInfo_GL_NV_vertex_program3();
+#endif /* GL_NV_vertex_program3 */
 #ifdef GL_OML_interlace
   _glewInfo_GL_OML_interlace();
 #endif /* GL_OML_interlace */
@@ -5588,6 +5693,9 @@ static void glxewInfo ()
 #ifdef GLX_EXT_visual_rating
   _glewInfo_GLX_EXT_visual_rating();
 #endif /* GLX_EXT_visual_rating */
+#ifdef GLX_MESA_agp_offset
+  _glewInfo_GLX_MESA_agp_offset();
+#endif /* GLX_MESA_agp_offset */
 #ifdef GLX_MESA_copy_sub_buffer
   _glewInfo_GLX_MESA_copy_sub_buffer();
 #endif /* GLX_MESA_copy_sub_buffer */
@@ -5703,7 +5811,17 @@ int main (void)
     return 1;
   }
   glewExperimental = GL_TRUE;
+#ifdef GLEW_MX
+  err = glewContextInit(glewGetContext());
+#ifdef _WIN32
+  err = err || wglewContextInit(wglewGetContext());
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+  err = err || glxewContextInit(glxewGetContext());
+#endif
+
+#else
   err = glewInit();
+#endif
   if (GLEW_OK != err)
   {
     fprintf(stderr, "Error [main]: glewInit failed: %s\n", glewGetErrorString(err));

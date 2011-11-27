@@ -1,3 +1,28 @@
+27.09.2004
+    Release 1.0.1
+
+25.09.2004
+    Fixed: stupid bug in respect scissoring change
+
+24.09.2004
+    Added: respect scissoring setting of OpenGL; calculate CSG
+        z-values only in the given scissor area.
+
+23.09.2004
+    Added: StencilManager, that, in future will possibly save and 
+        restore the stencil buffer of the main frame buffer. The
+        StencilManager is currently deactivated, though.
+
+06.08.2004
+    Fixed: RenderTexture did not report the correct stencil size
+        of the pbuffer under linux. The expected values are now
+        written there by hand.
+
+20.07.2004
+    Changed: Updated RenderTexture to version 2.0.3. This requires 
+        further testing on all possible platforms because I have 
+        removed some private hacks due to this change.
+
 02.05.2004
     Release 1.0.0
 
@@ -8,7 +33,7 @@
 
 22.04.2004: 
     Changed: Compile a shared library on Linux now
-	
+
 08.04.2004:
     Changed: When possible use GL_TEXTURE_RECTANGLE_NV texture format
         even if GL_TEXTURE_2D would work also. The former appears to be

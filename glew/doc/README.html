@@ -101,11 +101,11 @@ All About OpenGL Extensions</a>
 href="http://www.ati.com/developer/sdk/radeonSDK/html/info/Prog3D.html">ATI
 OpenGL Extension Specifications</a>
 <li><a
-href="http://developer.nvidia.com/view.asp?IO=nvidia_opengl_specs">NVIDIA
-OpenGL Extension Specifications</a>
-<li><a
 href="http://developer.apple.com/opengl/extensions.html">
 APPLE OpenGL Extensions Guide</a>
+<li><a
+href="http://developer.nvidia.com/view.asp?IO=nvidia_opengl_specs">NVIDIA
+OpenGL Extension Specifications</a>
 </ul>
 <p>
 </td>
@@ -370,16 +370,15 @@ entry points.
 
 <p>
 
-<h3>wglinfo: extensions and visuals on Windows</h3>
+<h3>visualinfo: extensions and visuals</h3>
 <p>
 
-<tt>wglinfo</tt> is the Windows version of <tt>glxinfo</tt>. By
-default it creates a file called <tt>wglinfo.txt</tt> that contains a
-list of available OpenGL, WGL, and GLU extensions as well as a table
-of visuals aka. pixel formats. Pbuffer and multiple output capable
-visuals are also included. The format of the table is described <a
-href="wglinfo.txt">here</a>. For additional usage information, type
-<tt>wglinfo -h</tt>.
+<tt>visualinfo</tt> is an extended version of <tt>glxinfo</tt>. On
+Windows, by default it creates a file called <tt>visualinfo.txt</tt>
+that contains a list of available OpenGL, WGL, and GLU extensions as
+well as a table of visuals aka. pixel formats. Pbuffer and multiple
+output capable visuals are also included. For additional usage
+information, type <tt>visualinfo -h</tt>.
 
 <p>
 
@@ -472,15 +471,26 @@ versions. To include multi-context support, you have to do the
 following:
 
 <ol>
-<li>Compile and use GLEW with the <tt>GLEW_MX</tt> preprocessor token defined.</li>
-<li>Replace the global <tt>glewInit()</tt> call with <tt>glewContextInit(GLEWContext* ctx)</tt>. Note, that <tt>ctx</tt> has to reside in global or thread-local memory.</li>
-<li>Define the <tt>glewGetContext()</tt> macro or function that retrieves the GLEW context for the thread from which the OpenGL/WGL/GLX call is issued. The dispatch mechanism is primitive, but generic.</li>
+<li>Compile and use GLEW with the <tt>GLEW_MX</tt> preprocessor token
+defined.</li>
+<li>For each rendering context, create a <tt>GLEWContext</tt> object
+that will be available as long as the rendering context exists.</li>
+<li>Define a macro or function called <tt>glewGetContext()</tt> that
+returns a pointer to the <tt>GLEWContext</tt> object associated with
+the rendering context from which OpenGL/WGL/GLX calls are
+issued. (This dispatch mechanism is primitive, but generic.)
+<li>Replace the global <tt>glewInit()</tt> call with
+<tt>glewContextInit(glewGetContext())</tt>. Note, that the
+<tt>GLEWContext</tt> pointer returned by <tt>glewGetContext()</tt> has
+to reside in global or thread-local memory. Also, remember to call
+<tt>glewContextInit</tt> after creating the <tt>GLEWContext</tt> object
+in each rendering context.
 </ol>
 
-<p> Note that according to <a
+<p>Note that according to <a
 href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/opengl/ntopnglr_6yer.asp">WGL
 documentation</a>, you have to initialize the entry points for every
-rendering context you create using pixel formats with different
+rendering context you create that use pixel formats with different
 capabilities (for example the pixel formats provided by the generic
 software OpenGL implementation by Microsoft vs. the hardware
 accelerated pixel formats).  <b>GLEW by default ignores this
@@ -492,7 +502,7 @@ same entry points and capabilities (and why would anyone want to use
 the software renderer when hardware acceleration is available?). This
 means that unless you use the multi-context version of GLEW, you need
 to call <tt>glewInit()</tt> only once in your program, or more
-precisely, once per process.
+precisely, once per process.</p>
 
 <p>
 
@@ -550,8 +560,26 @@ generation scripts are released under the <a href="gpl.txt">GPL</a>.
 <td bgcolor="#ffffff">
 <center><a name="Log"><h2>Change Log</h2></a></center>
 <p>
-
 <ul class="none">
+<li><b>1.2.4</b> [09-06-04]
+<ul>
+<li> Added ARB_draw_buffers and ARB_texture_rectangle
+<li> Replaced <tt>wglinfo</tt> with <tt>visualinfo</tt>
+</ul>
+<p>
+<li><b>1.2.3</b> [06-10-04]
+<ul>
+<li> Added NV_fragment_program2, NV_fragment_program_option, NV_vertex_program2_option, NV_vertex_program3
+<li> Bug fix in GL_ARB_vertex_blend
+</ul>
+<p>
+<li><b>1.2.2</b> [05-08-04]
+<ul>
+<li> Added GL_EXT_pixel_buffer_object, removed GL_NV_element_array
+<li> Fixed GLEW_MX problems
+<li> Bug fix in GL_EXT_texture_rectangle and <tt>wglinfo</tt>
+</ul>
+<p>
 <li><b>1.2.1</b> [03-18-04]
 <ul>
 <li> Bug fix in OpenGL version query (early release of 1.2.0 contained this bug)
@@ -670,7 +698,7 @@ GL_ARB_vertex_shader
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
 <td align="right">
-<i>Last update: 03-18-04</i></td>
+<i>Last update: 06-10-04</i></td>
 </tr>
 </table>
 </td>
