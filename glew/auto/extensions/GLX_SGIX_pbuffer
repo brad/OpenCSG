@@ -1,5 +1,5 @@
 GLX_SGIX_pbuffer
-http://oss.sgi.com/projects/ogl-sample/registry/SGIX/pbuffer.txt
+http://www.opengl.org/registry/specs/SGIX/pbuffer.txt
 	GLX_FRONT_LEFT_BUFFER_BIT_SGIX 0x00000001
 	GLX_FRONT_RIGHT_BUFFER_BIT_SGIX 0x00000002
 	GLX_PBUFFER_BIT_SGIX 0x00000004

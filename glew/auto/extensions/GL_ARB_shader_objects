@@ -1,5 +1,5 @@
 GL_ARB_shader_objects
-http://oss.sgi.com/projects/ogl-sample/registry/ARB/shader_objects.txt
+http://www.opengl.org/registry/specs/ARB/shader_objects.txt
 	GL_PROGRAM_OBJECT_ARB 0x8B40
 	GL_SHADER_OBJECT_ARB 0x8B48
 	GL_OBJECT_TYPE_ARB 0x8B4E

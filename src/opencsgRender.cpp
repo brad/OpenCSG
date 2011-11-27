@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2009, Florian Kirsch,
+// Copyright (C) 2002-2010, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -55,22 +55,13 @@ namespace OpenCSG {
 
     } // unnamed namespace
 
-    void render(const std::vector<Primitive*>& primitives, 
-                Algorithm algorithm, 
-                DepthComplexityAlgorithm depthComplexityAlgorithm) {
 
-        if (primitives.size() == 0) {
+    void renderDispatch(const std::vector<Primitive*>& primitives, 
+                        Algorithm algorithm, 
+                        DepthComplexityAlgorithm depthComplexityAlgorithm)
+    {
+        if (primitives.empty()) {
             return;
-        }
-
-        int algorithmOrig  = getOption(AlgorithmSetting);
-        int depthComplOrig = getOption(DepthComplexitySetting);
-        bool legacyInterface = false;
-        if (algorithm != AlgorithmUnused) {
-            legacyInterface = true;
-        } else {
-            algorithm = (Algorithm)getOption(AlgorithmSetting);
-            depthComplexityAlgorithm = (DepthComplexityAlgorithm)getOption(DepthComplexitySetting);
         }
 
         if (algorithm == Automatic) {
@@ -111,10 +102,25 @@ namespace OpenCSG {
                 break;
             }
         }
+    }
 
-        if (legacyInterface) {
-            setOption(AlgorithmSetting, algorithmOrig);
-            setOption(DepthComplexitySetting, depthComplOrig);
+    void render(const std::vector<Primitive*>& primitives)
+    {
+        Algorithm algorithm = (Algorithm)getOption(AlgorithmSetting);
+        DepthComplexityAlgorithm depthComplexityAlgorithm = (DepthComplexityAlgorithm)getOption(DepthComplexitySetting);
+
+        renderDispatch(primitives, algorithm, depthComplexityAlgorithm);
+    }
+
+    void render(const std::vector<Primitive*>& primitives, 
+                Algorithm algorithm, 
+                DepthComplexityAlgorithm depthComplexityAlgorithm)
+    {
+        if (algorithm == AlgorithmUnused) {
+            render(primitives);
+        }
+        else {
+            renderDispatch(primitives, algorithm, depthComplexityAlgorithm);
         }
     }
 

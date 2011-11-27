@@ -1,5 +1,5 @@
 GL_NV_register_combiners
-http://oss.sgi.com/projects/ogl-sample/registry/NV/register_combiners.txt
+http://www.opengl.org/registry/specs/NV/register_combiners.txt
 	GL_REGISTER_COMBINERS_NV 0x8522
 	GL_VARIABLE_A_NV 0x8523
 	GL_VARIABLE_B_NV 0x8524

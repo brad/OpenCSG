@@ -1,5 +1,5 @@
 GL_ARB_draw_buffers
-http://oss.sgi.com/projects/ogl-sample/registry/ARB/draw_buffers.txt
+http://www.opengl.org/registry/specs/ARB/draw_buffers.txt
 	GL_MAX_DRAW_BUFFERS_ARB 0x8824
 	GL_DRAW_BUFFER0_ARB 0x8825
 	GL_DRAW_BUFFER1_ARB 0x8826

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2009, Florian Kirsch,
+// Copyright (C) 2002-2010, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -21,13 +21,16 @@
 
 namespace OpenCSG {
 
-    NDCArea::operator PCArea() const {
+    NDCVolume::operator PCArea() const {
         using OpenGL::canvasPos;
 
-        int iminx = static_cast<int>( (minx + 1.0)*0.5 * (canvasPos[2] - canvasPos[0]) );
-        int imaxx = static_cast<int>( (maxx + 1.0)*0.5 * (canvasPos[2] - canvasPos[0]) );
-        int iminy = static_cast<int>( (miny + 1.0)*0.5 * (canvasPos[3] - canvasPos[1]) );
-        int imaxy = static_cast<int>( (maxy + 1.0)*0.5 * (canvasPos[3] - canvasPos[1]) );  
+        double widthPixels  = 0.5 * (canvasPos[2] - canvasPos[0]);
+        double heightPixels = 0.5 * (canvasPos[3] - canvasPos[1]);
+
+        int iminx = static_cast<int>( (minx + 1.0) * widthPixels );
+        int imaxx = static_cast<int>( (maxx + 1.0) * widthPixels );
+        int iminy = static_cast<int>( (miny + 1.0) * heightPixels );
+        int imaxy = static_cast<int>( (maxy + 1.0) * heightPixels );  
     
         return PCArea(iminx, iminy, imaxx, imaxy); 
     }

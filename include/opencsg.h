@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2009, Florian Kirsch,
+// Copyright (C) 2002-2010, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -81,11 +81,39 @@ namespace OpenCSG {
         float mMinx, mMiny, mMinz, mMaxx, mMaxy, mMaxz;
     };
 
+    /// The function render() performs CSG rendering. The function initializes 
+    /// the z-buffer with the z-values of the CSG product given as array of 
+    /// primitives. It does not alter the color buffer, so you have to shade
+    /// the primitives using GL_EQUAL depth function afterwards. The content
+    /// of the stencil buffer is destroyed when handling concave primitives or 
+    /// when using the DepthComplexitySampling strategy.
+    ///
+    /// render() respects the OpenGL settings of 
+    ///   - scissor test (CSG calculating will only occur in the specified region)
+    ///   - stencil test, when only convex primitives are used and no layered 
+    ///         algorithm is used. Most stenciling ops (increment / decrement 
+    ///         / zero / one) will not be useful anyway.
+    ///
+    /// render() ignores
+    ///   - depth test (always GL_LESS)
+    ///   - alpha test (used internally)
+    ///   - cull face  (used internally to distinguish intersected / subtracted 
+    ///         primitives)
+    ///
+    /// The exact CSG algorithm can be specified using the setOption() function
+    /// of which the possible parameters are described below. An overloaded
+    /// version of the render() function is provided below, which takes 
+    /// some parameters for specifying Algorithm and DepthComplexityAlgorithm 
+    /// directly. 
+    void render(const std::vector<Primitive*>& primitives);
+
+    /// OpenCSG option for use with setOption() / getOption() below
     enum OptionType {
-        AlgorithmSetting       = 0,
-        DepthComplexitySetting = 1,
-        OffscreenSetting       = 2,
-        OptionTypeUnused       = 3
+        AlgorithmSetting        = 0,
+        DepthComplexitySetting  = 1,
+        OffscreenSetting        = 2,
+        DepthBoundsOptimization = 3,
+        OptionTypeUnused        = 4
     };
 
     /// Sets an OpenCSG option.
@@ -106,9 +134,11 @@ namespace OpenCSG {
     ///                  primitives, else OcclusionQuery or at the last resort
     ///                  DepthComplexitySampling). This setting is the default.
     ///   - AlgorithmUnused : For use with setOption, this value is invalid. 
-    ///                  As parameter of the render() function, specifies to
-    ///                  read all OpenCSG settings from the settings set with
-    ///                  setOption() and not from the parameter list of render().
+    ///                  As parameter of the obsolete render() function, specifies
+    ///                  to read all OpenCSG settings from the settings set with
+    ///                  setOption() and not from the parameter list of render(),
+    ///                  i.e., rendering is done as in the render() function taking
+    ///                  only one parameter. 
     enum Algorithm {
         Automatic        = 0,
         Goldfeather      = 1,
@@ -146,11 +176,14 @@ namespace OpenCSG {
     /// the internal calculations. 
     ///   - AutomaticOffscreenType: Chooses internally depending on available
     ///                  OpenGL extensions. If graphics hardware both support
-    ///                  frame buffer objects and PBuffers, PBuffers are chosen.
+    ///                  frame buffer objects and PBuffers, frame buffer objects
+    ///                  are chosen.
     ///   - FrameBufferObject: Uses frame buffer objects. This method does 
     ///                  not require context switches on the graphics hardware
     ///                  to change between offscreen and main frame buffer, so
-    ///                  in theory this method should be faster.
+    ///                  in theory this method should be faster. Both ARB and
+    ///                  EXT frame buffer objects OpenGL extensions are supported
+    ///                  internally.
     ///   - PBuffer: Uses PBuffers. This is the older offscreen type, which
     ///                  is likely to work with older graphics hardware and
     ///                  drivers.
@@ -162,30 +195,38 @@ namespace OpenCSG {
         OffscreenTypeUnused    = 3
     };
 
-    /// The function render() performs CSG rendering. The function initializes 
-    /// the z-buffer with the z-values of the CSG product given as array of 
-    /// primitives. It does not alter the color buffer, so you have to shade
-    /// the primitives using GL_EQUAL depth function afterwards. The content
-    /// of the stencil buffer is destroyed when handling concave primitives or 
-    /// when using the DepthComplexitySampling strategy.
-    ///
-    /// Algorithm and DepthComplexityAlgorithm parameter can be provided and,
-    /// if provided, supercede the options set by setOptioni(). In future
-    /// versions of OpenCSG, these parameters will probably be removed.
-    ///
-    /// render() respects the OpenGL settings of 
-    ///   - scissor test (CSG calculating will only occur in the specified region)
-    ///   - stencil test, when only convex primitives are used and no layered 
-    ///         algorithm is used. Most stenciling ops (increment / decrement 
-    ///         / zero / one) will not be useful anyway.
-    ///
-    /// render() ignores
-    ///   - depth test (always GL_LESS)
-    ///   - alpha test (used internally)
-    ///   - cull face  (used internally to distinguish intersected / subtracted 
-    ///         primitives)
+    /// The Optimization flags set whether a specific kind of optimization is
+    /// enabled or not. This can be set for the following kinds of optimizations:
+    ///   - DepthBoundsOptimization: Improves rendering performance by using 
+    ///     the depth bounds check found on some graphics hardware. By default,
+    ///     this optimization is turned off! When you turn it on, you must 
+    ///     provide correct bounding boxes for all primitives, in particular
+    ///     along the z-axis.
+    /// Each optimization can be independently set
+    ///   - OptimizationDefault     to its default value (depending of the kind
+    ///                             of optimization)
+    ///   - OptimizationForceOn     on (does not check OpenGL extensions)
+    ///   - OptimizationOn          on if required OpenGL extensions are supported,
+    ///   - OptimizationOff         off
+    ///   - OptimizationUnused:     Invalid input. 
+    enum Optimization {
+        OptimizationDefault   = 0,
+        OptimizationForceOn   = 1,
+        OptimizationOn        = 2,
+        OptimizationOff       = 3,
+        OptimizationUnused    = 4
+    };
+
+    /// Alternate render() function provided for compatibility with older
+    /// versions of OpenCSG (version 1.1.1 and before). The function performs
+    /// CSG rendering as the render() function described above. Additionally,
+    /// the Algorithm parameter must and the DepthComplexityAlgorithm parameter
+    /// can be provided. They supercede the options set by setOption().
+    /// This function is considered obsolete. New software should use the
+    /// render() function above and set the Options for rendering in separate
+    /// setOption() calls. 
     void render(const std::vector<Primitive*>& primitives, 
-                Algorithm = AlgorithmUnused, 
+                Algorithm, 
                 DepthComplexityAlgorithm = NoDepthComplexitySampling);
 
 } // namespace OpenCSG

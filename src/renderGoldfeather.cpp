@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2009, Florian Kirsch,
+// Copyright (C) 2002-2010, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -61,7 +61,7 @@ namespace OpenCSG {
                 const std::vector<Primitive*> primitives = getPrimitives(*c);
 
                 scissor->recall(*c);
-                scissor->enable();
+                scissor->enableScissor();
 
                 setupTexEnv(*c);
 
@@ -86,7 +86,7 @@ namespace OpenCSG {
             glDisable(GL_CULL_FACE);
             glDepthFunc(GL_LEQUAL);
 
-            scissor->disable();
+            scissor->disableScissor();
 
             resetProjectiveTexture();
 
@@ -286,7 +286,7 @@ namespace OpenCSG {
 
                 scissor->setCurrent(*itr);
                 scissor->store(channelMgr->current());
-                scissor->enable();
+                scissor->enableScissor();
 
                 if (maxConvexity == 1) {
                     // shapes of interest: we need to determine which parts of them are visible.
@@ -309,9 +309,12 @@ namespace OpenCSG {
                     glClear(GL_STENCIL_BUFFER_BIT);
                 }
 
+                scissor->enableDepthBoundsBack();
+
                 parityTestAndDiscard(*itr, primitives, false, OpenGL::stencilMask);
 
-                scissor->disable();
+                scissor->disableDepthBounds();
+                scissor->disableScissor();
 
                 channelMgr->store(channelMgr->current(), *itr, maxConvexity == 1 ? -1 : static_cast<int>(currentLayer));
             }
@@ -345,7 +348,7 @@ namespace OpenCSG {
             }
 
             scissor->store(channelMgr->current());
-            scissor->enable();
+            scissor->enableScissor();
 
             if (!occlusionTest) {
                 occlusionTest = OpenGL::getOcclusionQuery();
@@ -376,7 +379,7 @@ namespace OpenCSG {
 
             channelMgr->store(channelMgr->current(), primitives, layer);
 
-            scissor->disable();
+            scissor->disableScissor();
 
             ++layer;
         }
@@ -399,12 +402,12 @@ namespace OpenCSG {
         scissor->setIntersected(primitives);
         stencilMgr = OpenGL::getStencilManager(scissor->getIntersectedArea());
         scissor->setCurrent(primitives);
-        scissor->enable();
+        scissor->enableScissor();
 
         stencilMgr->clear();
         unsigned int depthComplexity = OpenGL::calcMaxDepthComplexity(primitives, scissor->getIntersectedArea());
 
-        scissor->disable();
+        scissor->disableScissor();
 
         for (unsigned int layer = 0; layer < depthComplexity; ++layer) {
             if (channelMgr->request() == NoChannel) {
@@ -413,7 +416,7 @@ namespace OpenCSG {
             }
 
             scissor->store(channelMgr->current());
-            scissor->enable();
+            scissor->enableScissor();
 
             channelMgr->renderToChannel(true);
 
@@ -431,7 +434,7 @@ namespace OpenCSG {
 
             channelMgr->store(channelMgr->current(), primitives, layer);
 
-            scissor->disable();
+            scissor->disableScissor();
         }
 
         channelMgr->free();

@@ -1,5 +1,5 @@
 GL_ARB_window_pos
-http://oss.sgi.com/projects/ogl-sample/registry/ARB/window_pos.txt
+http://www.opengl.org/registry/specs/ARB/window_pos.txt
 	void glWindowPos2dARB (GLdouble x, GLdouble y)
 	void glWindowPos2dvARB (const GLdouble* p)
 	void glWindowPos2fARB (GLfloat x, GLfloat y)

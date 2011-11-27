@@ -3,7 +3,7 @@
 **
 ** Copyright (C) Nate Robins, 1997
 **               Michael Wimmer, 1999
-**               Milan Ikits, 2003-2006
+**               Milan Ikits, 2002-2008
 **
 ** visualinfo is a small utility that displays all available visuals,
 ** aka. pixelformats, in an OpenGL system along with renderer version
@@ -1056,7 +1056,7 @@ GLboolean CreateContext (GLContext* ctx)
   aglDestroyPixelFormat(pf);
   /*aglSetDrawable(ctx, GetWindowPort(wnd));*/
   ctx->octx = aglGetCurrentContext();
-  if (NULL == aglSetCurrentContext(ctx->ctx)) return GL_TRUE;
+  if (GL_FALSE == aglSetCurrentContext(ctx->ctx)) return GL_TRUE;
   return GL_FALSE;
 }
 

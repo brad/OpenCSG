@@ -35,9 +35,26 @@
 #endif /* GLEW_MX */
 
 #if defined(__APPLE__)
-#include <mach-o/dyld.h>
 #include <stdlib.h>
 #include <string.h>
+#include <AvailabilityMacros.h>
+
+#ifdef MAC_OS_X_VERSION_10_3
+
+#include <dlfcn.h>
+
+void* NSGLGetProcAddress (const GLubyte *name)
+{
+  static void* image = NULL;
+  if (NULL == image) 
+  {
+    image = dlopen("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", RTLD_LAZY);
+  }
+  return image ? dlsym(image, (const char*)name) : NULL;
+}
+#else
+
+#include <mach-o/dyld.h>
 
 void* NSGLGetProcAddress (const GLubyte *name)
 {
@@ -59,6 +76,7 @@ void* NSGLGetProcAddress (const GLubyte *name)
   free(symbolName);
   return symbol ? NSAddressOfSymbol(symbol) : NULL;
 }
+#endif /* MAC_OS_X_VERSION_10_3 */
 #endif /* __APPLE__ */
 
 #if defined(__sgi) || defined (__sun)
@@ -102,10 +120,14 @@ void* dlGetProcAddress (const GLubyte* name)
 #endif
 
 /*
+ * Define GLboolean const cast.
+ */
+#define CONST_CAST(x) (*(GLboolean*)&x)
+
+/*
  * GLEW, just like OpenGL or GLU, does not rely on the standard C library.
  * These functions implement the functionality required in this file.
  */
-
 static GLuint _glewStrLen (const GLubyte* s)
 {
   GLuint i=0;
@@ -119,7 +141,7 @@ static GLuint _glewStrCLen (const GLubyte* s, GLubyte c)
   GLuint i=0;
   if (s == NULL) return 0;
   while (s[i] != '\0' && s[i] != c) i++;
-  return s[i] == c ? i : 0;
+  return (s[i] == '\0' || s[i] == c) ? i : 0;
 }
 
 static GLboolean _glewStrSame (const GLubyte* a, const GLubyte* b, GLuint n)

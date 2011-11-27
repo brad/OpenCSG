@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2009, Florian Kirsch,
+// Copyright (C) 2002-2010, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -157,6 +157,16 @@ namespace OpenCSG {
         if (!gOffscreenBuffer || (gOffscreenType != newOffscreenType)) {
             gOffscreenType = newOffscreenType;
             if (newOffscreenType == OpenCSG::AutomaticOffscreenType) {
+                if (GLEW_ARB_framebuffer_object) {
+                    newOffscreenType = OpenCSG::FrameBufferObject;
+                }
+                else 
+                if (   GLEW_EXT_framebuffer_object
+                    && GLEW_EXT_packed_depth_stencil
+                ) {
+                    newOffscreenType = OpenCSG::FrameBufferObject;
+                }
+                else
 #ifdef WIN32
                 if (   WGLEW_ARB_pbuffer
                     && WGLEW_ARB_pixel_format
@@ -165,17 +175,11 @@ namespace OpenCSG {
                     && GLXEW_SGIX_fbconfig
 #endif
                 ) {
-                     newOffscreenType =  OpenCSG::PBuffer;
+                    newOffscreenType = OpenCSG::PBuffer;
                 }
-                else 
-                if (   GLEW_EXT_framebuffer_object
-                    && GLEW_EXT_packed_depth_stencil
-                ) {
-                    newOffscreenType =  OpenCSG::FrameBufferObject;
-                } 
                 else {
-                     // This should gracefully exit without doing anything
-                     newOffscreenType =  OpenCSG::PBuffer;
+                    // This should gracefully exit without doing anything
+                    newOffscreenType = OpenCSG::FrameBufferObject;
                 }
             }
             if (newOffscreenType == FrameBufferObject) {

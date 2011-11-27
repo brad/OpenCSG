@@ -1,5 +1,5 @@
 GL_SUN_triangle_list
-http://oss.sgi.com/projects/ogl-sample/registry/SUN/triangle_list.txt
+http://www.opengl.org/registry/specs/SUN/triangle_list.txt
 	GL_RESTART_SUN 0x01
 	GL_REPLACE_MIDDLE_SUN 0x02
 	GL_REPLACE_OLDEST_SUN 0x03

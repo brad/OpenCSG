@@ -5,9 +5,13 @@
 #ifdef __glxext_h_
 #error glxext.h included before glxew.h
 #endif
+#ifdef GLX_H
+#error glx.h included before glxew.h
+#endif
 
 #define __glxext_h_
 #define __GLX_glx_h__
+#define GLX_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -51,10 +55,12 @@ extern "C" {
 typedef XID GLXDrawable;
 typedef XID GLXPixmap;
 #ifdef __sun
-typedef struct __glXcontextRec *GLXContext;
+typedef struct __glXContextRec *GLXContext;
 #else
 typedef struct __GLXcontextRec *GLXContext;
 #endif
+
+typedef unsigned int GLXVideoDeviceNV; 
 
 extern Bool glXQueryExtension (Display *dpy, int *errorBase, int *eventBase);
 extern Bool glXQueryVersion (Display *dpy, int *major, int *minor);
@@ -65,7 +71,7 @@ extern void glXDestroyGLXPixmap (Display *dpy, GLXPixmap pix);
 extern GLXContext glXCreateContext (Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct);
 extern void glXDestroyContext (Display *dpy, GLXContext ctx);
 extern Bool glXIsDirect (Display *dpy, GLXContext ctx);
-extern void glXCopyContext (Display *dpy, GLXContext src, GLXContext dst, GLuint mask);
+extern void glXCopyContext (Display *dpy, GLXContext src, GLXContext dst, GLulong mask);
 extern Bool glXMakeCurrent (Display *dpy, GLXDrawable drawable, GLXContext ctx);
 extern GLXContext glXGetCurrentContext (void);
 extern GLXDrawable glXGetCurrentDrawable (void);

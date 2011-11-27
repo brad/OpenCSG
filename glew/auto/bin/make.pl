@@ -1,6 +1,6 @@
 ##
-## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
-## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
+## Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -10,7 +10,7 @@ my %regex = (
     extname  => qr/^[A-Z][A-Za-z0-9_]+$/,
     exturl   => qr/^http.+$/,
     function => qr/^(.+) ([a-z][a-z0-9_]*) \((.+)\)$/i, 
-    token    => qr/^([A-Z][A-Z0-9_]*)\s+((?:0x)?[0-9A-F]+|[A-Z][A-Z0-9_]*)$/,
+    token    => qr/^([A-Z][A-Z0-9_x]*)\s+((?:0x)?[0-9A-Fa-f]+|[A-Z][A-Z0-9_]*)$/,
     type     => qr/^typedef\s+(.+)\s+([\*A-Za-z0-9_]+)$/,
     exact    => qr/.*;$/,
 );
@@ -35,7 +35,9 @@ sub prefix_varname($)
 
 sub make_exact($)
 {
-    return "$_[0]"
+	my $exact = $_[0];
+	$exact =~ s/(; |{)/$1\n/g;
+    return $exact;
 }
 
 sub make_separator($)
@@ -90,7 +92,7 @@ sub parse_ext($)
         {
             if (/$regex{exact}/)
             {
-		push @exacts, $_;
+				push @exacts, $_;
             }
             elsif (/$regex{type}/)
             {
@@ -109,6 +111,8 @@ sub parse_ext($)
 		    rtype => $return,
 		    parms => $parms,
 		};
+            } else {
+                print STDERR "'$_' matched no regex.\n";
             }
         }
     }
@@ -127,6 +131,8 @@ sub output_tokens($$)
         print "\n";
         print map { &{$fnc}($_, $tbl->{$_}) } sort { hex ${$tbl}{$a} <=> hex ${$tbl}{$b} } keys %{$tbl};
         print "\n";
+    } else {
+        print STDERR "no keys in table!\n";
     }
 }
 

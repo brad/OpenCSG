@@ -1,7 +1,7 @@
 #!gmake
 ## The OpenGL Extension Wrangler Library
-## Copyright (C) 2002-2006, Milan Ikits <milan ikits[]ieee org>
-## Copyright (C) 2002-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
+## Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
 ## Copyright (C) 2002, Lev Povalahev
 ## All rights reserved.
 ## 
@@ -28,13 +28,7 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 ## THE POSSIBILITY OF SUCH DAMAGE.
 
-GLEW_DEST ?= /usr
-LIBDIR = $(GLEW_DEST)/lib
-
 include config/version
-
-TARDIR = ../glew-$(GLEW_VERSION)
-TARBALL = ../glew_$(GLEW_VERSION).tar.gz
 
 SHELL = /bin/sh
 SYSTEM = $(shell config/config.guess | cut -d - -f 3 | sed -e 's/[0-9\.]//g;')
@@ -46,20 +40,28 @@ else
 $(error "Platform '$(SYSTEM)' not supported")
 endif
 
-ifeq (undefined, $(origin SHARED_OBJ_EXT))
-SHARED_OBJ_EXT = o
-endif
+GLEW_DEST ?= /usr
+BINDIR ?= $(GLEW_DEST)/bin
+LIBDIR ?= $(GLEW_DEST)/lib
+INCDIR ?= $(GLEW_DEST)/include/GL
+SHARED_OBJ_EXT ?= o
+TARDIR = ../glew-$(GLEW_VERSION)
+TARBALL = ../glew-$(GLEW_VERSION).tar.gz
+
+DIST_DIR     = glew-$(GLEW_VERSION)
+DIST_WIN32   = glew-$(GLEW_VERSION)-win32.zip
+DIST_SRC_ZIP = glew-$(GLEW_VERSION).zip
+DIST_SRC_TGZ = glew-$(GLEW_VERSION).tgz
 
 AR = ar
 INSTALL = install
+STRIP = strip
 RM = rm -f
 LN = ln -sf
 ifeq ($(MAKECMDGOALS), debug)
 OPT = -g
-STRIP =
 else
 OPT = $(POPT)
-STRIP = -s
 endif
 INCLUDE = -Iinclude
 CFLAGS = $(OPT) $(WARN) $(INCLUDE) $(CFLAGS.EXTRA)
@@ -72,11 +74,11 @@ LIB.LIBS = $(GL_LDFLAGS)
 
 GLEWINFO.BIN = glewinfo$(BIN.SUFFIX)
 GLEWINFO.BIN.SRCS = src/glewinfo.c
-GLEWINFO.BIN.OBJS = $(GLEWINFO_BIN.SRCS:.c=.o)
+GLEWINFO.BIN.OBJS = $(GLEWINFO.BIN.SRCS:.c=.o)
 VISUALINFO.BIN = visualinfo$(BIN.SUFFIX)
 VISUALINFO.BIN.SRCS = src/visualinfo.c
-VISUALINFO.BIN.OBJS = $(VISUALINFO_BIN.SRCS:.c=.o)
-BIN.LIBS = -Llib $(LDFLAGS.STATIC) -l$(NAME) $(LDFLAGS.EXTRA) $(LDFLAGS.DYNAMIC) $(LDFLAGS.GL)
+VISUALINFO.BIN.OBJS = $(VISUALINFO.BIN.SRCS:.c=.o)
+BIN.LIBS = -Llib $(LDFLAGS.DYNAMIC) -l$(NAME) $(LDFLAGS.EXTRA) $(LDFLAGS.GL)
 
 all debug: lib/$(LIB.SHARED) lib/$(LIB.STATIC) bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN)
 
@@ -94,11 +96,11 @@ else
 	$(LN) $(LIB.SHARED) lib/$(LIB.DEVLNK)
 endif
 
-bin/$(GLEWINFO.BIN): $(GLEWINFO.BIN.SRCS) lib/$(LIB.SHARED)
-	$(CC) $(CFLAGS) -o $@ $^ $(BIN.LIBS)
+bin/$(GLEWINFO.BIN): $(GLEWINFO.BIN.OBJS) lib/$(LIB.SHARED)
+	$(CC) $(CFLAGS) -o $@ $(GLEWINFO.BIN.OBJS) $(BIN.LIBS)
 
-bin/$(VISUALINFO.BIN): $(VISUALINFO.BIN.SRCS) lib/$(LIB.SHARED)
-	$(CC) $(CFLAGS) -o $@ $^ $(BIN.LIBS)
+bin/$(VISUALINFO.BIN): $(VISUALINFO.BIN.OBJS) lib/$(LIB.SHARED)
+	$(CC) $(CFLAGS) -o $@ $(VISUALINFO.BIN.OBJS) $(BIN.LIBS)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -111,54 +113,45 @@ src/glew.pic_o: src/glew.c include/GL/glew.h include/GL/wglew.h include/GL/glxew
 
 install: all
 # directories
-	$(INSTALL) -d -m 0755 $(GLEW_DEST)/bin
-	$(INSTALL) -d -m 0755 $(GLEW_DEST)/include/GL
+	$(INSTALL) -d -m 0755 $(BINDIR)
+	$(INSTALL) -d -m 0755 $(INCDIR)
 	$(INSTALL) -d -m 0755 $(LIBDIR)
 # runtime
 ifeq ($(patsubst mingw%,mingw,$(SYSTEM)), mingw)
-	$(INSTALL) $(STRIP) -m 0644 lib/$(LIB.SHARED) $(GLEW_DEST)/bin/
+	$(STRIP) -x lib/$(LIB.SHARED)
+	$(INSTALL) -m 0644 lib/$(LIB.SHARED) $(BINDIR)/
 else
-  ifeq ($(patsubst darwin%,darwin,$(SYSTEM)), darwin)
-	strip -x lib/$(LIB.SHARED)
+	$(STRIP) -x lib/$(LIB.SHARED)
 	$(INSTALL) -m 0644 lib/$(LIB.SHARED) $(LIBDIR)/
 	$(LN) $(LIB.SHARED) $(LIBDIR)/$(LIB.SONAME)
-  else
-	$(INSTALL) $(STRIP) -m 0644 lib/$(LIB.SHARED) $(LIBDIR)/
-	$(LN) $(LIB.SHARED) $(LIBDIR)/$(LIB.SONAME)
-  endif
 endif
 # development files
-	$(INSTALL) -m 0644 include/GL/wglew.h $(GLEW_DEST)/include/GL
-	$(INSTALL) -m 0644 include/GL/glew.h $(GLEW_DEST)/include/GL
-	$(INSTALL) -m 0644 include/GL/glxew.h $(GLEW_DEST)/include/GL
+	$(INSTALL) -m 0644 include/GL/wglew.h $(INCDIR)/
+	$(INSTALL) -m 0644 include/GL/glew.h $(INCDIR)/
+	$(INSTALL) -m 0644 include/GL/glxew.h $(INCDIR)/
 ifeq ($(patsubst mingw%,mingw,$(SYSTEM)), mingw)
 	$(INSTALL) -m 0644 lib/$(LIB.DEVLNK) $(LIBDIR)/
 else
-  ifeq ($(patsubst darwin%,darwin,$(SYSTEM)), darwin)
-	strip -x lib/$(LIB.STATIC)
+	$(STRIP) -x lib/$(LIB.STATIC)
 	$(INSTALL) -m 0644 lib/$(LIB.STATIC) $(LIBDIR)/
 	$(LN) $(LIB.SHARED) $(LIBDIR)/$(LIB.DEVLNK)
-  else
-	$(INSTALL) $(STRIP) -m 0644 lib/$(LIB.STATIC) $(LIBDIR)/
-	$(LN) $(LIB.SHARED) $(LIBDIR)/$(LIB.DEVLNK)
-  endif
 endif
 # utilities
-	$(INSTALL) -s -m 0755 bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) $(GLEW_DEST)/bin/
+	$(INSTALL) -s -m 0755 bin/$(GLEWINFO.BIN) bin/$(VISUALINFO.BIN) $(BINDIR)/
 
 uninstall:
-	$(RM) $(GLEW_DEST)/include/GL/wglew.h
-	$(RM) $(GLEW_DEST)/include/GL/glew.h
-	$(RM) $(GLEW_DEST)/include/GL/glxew.h
+	$(RM) $(INCDIR)/wglew.h
+	$(RM) $(INCDIR)/glew.h
+	$(RM) $(INCDIR)/glxew.h
 	$(RM) $(LIBDIR)/$(LIB.DEVLNK)
 ifeq ($(patsubst mingw%,mingw,$(SYSTEM)), mingw)
-	$(RM) $(GLEW_DEST)/bin/$(LIB.SHARED)
+	$(RM) $(BINDIR)/$(LIB.SHARED)
 else
 	$(RM) $(LIBDIR)/$(LIB.SONAME)
 	$(RM) $(LIBDIR)/$(LIB.SHARED)
 	$(RM) $(LIBDIR)/$(LIB.STATIC)
 endif
-	$(RM) $(GLEW_DEST)/bin/$(GLEWINFO.BIN) $(GLEW_DEST)/bin/$(VISUALINFO.BIN)
+	$(RM) $(BINDIR)/$(GLEWINFO.BIN) $(BINDIR)/$(VISUALINFO.BIN)
 
 clean:
 	$(RM) $(LIB.OBJS)
@@ -177,13 +170,79 @@ tardist:
 	mkdir $(TARDIR)
 	cp -a . $(TARDIR)
 	find $(TARDIR) -name CVS -o -name .cvsignore | xargs $(RM) -r
+	find $(TARDIR) -name .svn | xargs $(RM) -r
 	$(MAKE) -C $(TARDIR) distclean
 	$(MAKE) -C $(TARDIR)
 	$(MAKE) -C $(TARDIR) distclean
 	$(RM) -r $(TARDIR)/auto/registry
 	env GZIP=-9 tar -C `dirname $(TARDIR)` -cvzf $(TARBALL) `basename $(TARDIR)`
 
+dist-win32:
+	$(RM) -r $(TARDIR)
+	mkdir -p $(TARDIR)
+	mkdir -p $(TARDIR)/bin
+	mkdir -p $(TARDIR)/lib
+	cp -a include $(TARDIR)
+	cp -a doc $(TARDIR)
+	cp -a *.txt $(TARDIR)
+	cp -a lib/glew32.lib     $(TARDIR)/lib
+	cp -a lib/glew32s.lib    $(TARDIR)/lib
+	cp -a bin/glew32.dll     $(TARDIR)/bin
+	cp -a bin/glewinfo.exe   $(TARDIR)/bin
+	cp -a bin/visualinfo.exe $(TARDIR)/bin
+	find $(TARDIR) -name CVS -o -name .cvsignore | xargs $(RM) -r
+	find $(TARDIR) -name .svn | xargs $(RM) -r
+	unix2dos $(TARDIR)/include/GL/*.h
+	unix2dos $(TARDIR)/doc/*.txt
+	unix2dos $(TARDIR)/doc/*.html
+	unix2dos $(TARDIR)/*.txt
+	rm -f ../$(DIST_WIN32)
+	cd .. && zip -rv9 $(DIST_WIN32) $(DIST_DIR)
+
+dist-src:
+	$(RM) -r $(TARDIR)
+	mkdir -p $(TARDIR)
+	mkdir -p $(TARDIR)/bin
+	mkdir -p $(TARDIR)/lib
+	cp -a auto $(TARDIR)
+	$(RM) -Rf $(TARDIR)/auto/registry
+	cp -a build $(TARDIR)
+	cp -a config $(TARDIR)
+	cp -a src $(TARDIR)
+	cp -a doc $(TARDIR)
+	cp -a include $(TARDIR)
+	cp -a *.txt $(TARDIR)
+	cp -a Makefile $(TARDIR)
+	find $(TARDIR) -name '*.o' | xargs $(RM) -r
+	find $(TARDIR) -name '*.pic_o' | xargs $(RM) -r
+	find $(TARDIR) -name '*~' | xargs $(RM) -r
+	find $(TARDIR) -name CVS -o -name .cvsignore | xargs $(RM) -r
+	find $(TARDIR) -name .svn | xargs $(RM) -r
+	unix2dos $(TARDIR)/config/*
+	unix2dos $(TARDIR)/auto/core/*
+	unix2dos $(TARDIR)/auto/extensions/*
+	find $(TARDIR) -name '*.h' | xargs unix2dos
+	find $(TARDIR) -name '*.c' | xargs unix2dos
+	find $(TARDIR) -name '*.txt' | xargs unix2dos
+	find $(TARDIR) -name '*.html' | xargs unix2dos
+	find $(TARDIR) -name '*.sh' | xargs unix2dos
+	find $(TARDIR) -name '*.pl' | xargs unix2dos
+	find $(TARDIR) -name 'Makefile' | xargs unix2dos
+	rm -f ../$(DIST_SRC_ZIP)
+	cd .. && zip -rv9 $(DIST_SRC_ZIP) $(DIST_DIR)
+	dos2unix $(TARDIR)/config/*
+	dos2unix $(TARDIR)/auto/core/*
+	dos2unix $(TARDIR)/auto/extensions/*
+	find $(TARDIR) -name '*.h' | xargs dos2unix
+	find $(TARDIR) -name '*.c' | xargs dos2unix
+	find $(TARDIR) -name '*.txt' | xargs dos2unix
+	find $(TARDIR) -name '*.html' | xargs dos2unix
+	find $(TARDIR) -name '*.sh' | xargs dos2unix
+	find $(TARDIR) -name '*.pl' | xargs dos2unix
+	find $(TARDIR) -name 'Makefile' | xargs dos2unix
+	cd .. && env GZIP=-9 tar cvzf $(DIST_SRC_TGZ) $(DIST_DIR)
+
 extensions:
 	$(MAKE) -C auto
 
-.PHONY: clean distclean tardist
+.PHONY: clean distclean tardist dist-win32 dist-src

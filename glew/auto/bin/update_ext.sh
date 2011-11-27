@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
-## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
-## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
+## Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -34,6 +34,28 @@ if [ ! -d $1 ] ; then
     grep -v -F -f $1/GLX_EXT_visual_info $1/GLX_EXT_visual_rating > tmp
     mv tmp $1/GLX_EXT_visual_rating
 
+# GL_EXT_draw_buffers2 and GL_EXT_transform_feedback both define glGetBooleanIndexedvEXT but with different parameter names
+    grep -v glGetBooleanIndexedvEXT $1/GL_EXT_transform_feedback > tmp
+    mv tmp $1/GL_EXT_transform_feedback    
+
+# GL_EXT_draw_buffers2 and GL_EXT_transform_feedback both define glGetIntegerIndexedvEXT but with different parameter names
+    grep -v glGetIntegerIndexedvEXT $1/GL_EXT_transform_feedback > tmp
+    mv tmp $1/GL_EXT_transform_feedback    
+
+# remove duplicates from GL_NV_present_video and GLX_NV_present_video
+    grep -v -F -f $1/GLX_NV_present_video $1/GL_NV_present_video > tmp
+    mv tmp $1/GL_NV_present_video
+
+# fix WGL_NV_present_video
+    cat >> $1/WGL_NV_present_video <<EOT
+    DECLARE_HANDLE(HVIDEOOUTPUTDEVICENV);
+EOT
+
+# fix WGL_NV_video_output
+    cat >> $1/WGL_NV_video_output <<EOT
+    DECLARE_HANDLE(HPVIDEODEV);
+EOT
+
 # fix GL_NV_occlusion_query and GL_HP_occlusion_test
     grep -v '_HP' $1/GL_NV_occlusion_query > tmp
     mv tmp $1/GL_NV_occlusion_query
@@ -56,14 +78,32 @@ if [ ! -d $1 ] ; then
 	GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI 0x8973
 	GL_NUM_LOOPBACK_COMPONENTS_ATI 0x8974
 	GL_COLOR_ALPHA_PAIRING_ATI 0x8975
-    GL_SWIZZLE_STRQ_ATI 0x897A
-    GL_SWIZZLE_STRQ_DQ_ATI 0x897B
+	GL_SWIZZLE_STRQ_ATI 0x897A
+	GL_SWIZZLE_STRQ_DQ_ATI 0x897B
 EOT
 
+# add deprecated constants to GL_NV_texture_shader
+    cat >> $1/GL_NV_texture_shader <<EOT
+	GL_OFFSET_TEXTURE_2D_MATRIX_NV 0x86E1
+	GL_OFFSET_TEXTURE_2D_BIAS_NV 0x86E3
+	GL_OFFSET_TEXTURE_2D_SCALE_NV 0x86E2
+EOT
+	
 # fix WGL_ATI_pixel_format_float
     cat >> $1/WGL_ATI_pixel_format_float <<EOT
 	GL_RGBA_FLOAT_MODE_ATI 0x8820
 	GL_COLOR_CLEAR_UNCLAMPED_VALUE_ATI 0x8835
+EOT
+
+# fix WGL_ARB_make_current_read
+    cat >> $1/WGL_ARB_make_current_read <<EOT
+	ERROR_INVALID_PIXEL_TYPE_ARB 0x2043
+	ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB 0x2054
+EOT
+
+# fix WGL_EXT_make_current_read
+    cat >> $1/WGL_EXT_make_current_read <<EOT
+	ERROR_INVALID_PIXEL_TYPE_EXT 0x2043
 EOT
 
 # add typedefs to GL_ARB_vertex_buffer_object; (from personal communication
@@ -145,6 +185,24 @@ EOT
     grep -v -F -f $1/GL_ARB_fragment_program $1/GL_ARB_vertex_shader > tmp
     mv tmp $1/GL_ARB_vertex_shader
 
+# remove duplicates in GL_EXT_direct_state_access
+    grep -v "glGetBooleanIndexedvEXT" $1/GL_EXT_direct_state_access > tmp
+    mv tmp $1/GL_EXT_direct_state_access
+    grep -v "glGetIntegerIndexedvEXT" $1/GL_EXT_direct_state_access > tmp
+    mv tmp $1/GL_EXT_direct_state_access
+    grep -v "glDisableIndexedEXT" $1/GL_EXT_direct_state_access > tmp
+    mv tmp $1/GL_EXT_direct_state_access
+    grep -v "glEnableIndexedEXT" $1/GL_EXT_direct_state_access > tmp
+    mv tmp $1/GL_EXT_direct_state_access
+    grep -v "glIsEnabledIndexedEXT" $1/GL_EXT_direct_state_access > tmp
+    mv tmp $1/GL_EXT_direct_state_access
+
+# remove duplicates in GL_NV_explicit_multisample
+    grep -v "glGetBooleanIndexedvEXT" $1/GL_NV_explicit_multisample > tmp
+    mv tmp $1/GL_NV_explicit_multisample
+    grep -v "glGetIntegerIndexedvEXT" $1/GL_NV_explicit_multisample > tmp
+    mv tmp $1/GL_NV_explicit_multisample
+
 # fix bugs in GL_ARB_vertex_shader
     grep -v "GL_FLOAT" $1/GL_ARB_vertex_shader > tmp
     mv tmp $1/GL_ARB_vertex_shader
@@ -170,8 +228,42 @@ EOT
 	void glMultTransposeMatrixdARB (GLdouble m[16])
 EOT
 
+# add missing tokens to GL_EXT_framebuffer_multisample
+	cat >> $1/GL_EXT_framebuffer_multisample <<EOT
+	GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT 0x8D56
+	GL_MAX_SAMPLES_EXT 0x8D57
+EOT
+
 # fix const correctness in GL_ARB_shader_objects
 #    perl -e 's/(.+glUniform.*(fv|iv).+)(GLfloat\*.+|GLint\*.+)/\1const \3/;' -pi $1/GL_ARB_shader_objects
+
+# Filter out profile enumerations from GLX_ARB_create_context
+    grep -v "_PROFILE_" $1/GLX_ARB_create_context > tmp
+    mv tmp $1/GLX_ARB_create_context
+
+# Filter only profile related enumerations for GLX_ARB_create_context_profile
+    head -n2 $1/GLX_ARB_create_context_profile > tmp
+    grep "_PROFILE_" $1/GLX_ARB_create_context_profile >> tmp
+    mv tmp $1/GLX_ARB_create_context_profile
+
+# Filter out profile enumerations from WGL_ARB_create_context
+    grep -v "_PROFILE_" $1/WGL_ARB_create_context > tmp
+    mv tmp $1/WGL_ARB_create_context
+
+# Filter only profile related enumerations for WGL_ARB_create_context_profile
+    head -n2 $1/WGL_ARB_create_context_profile > tmp
+    grep "_PROFILE_" $1/WGL_ARB_create_context_profile >> tmp
+    mv tmp $1/WGL_ARB_create_context_profile
+
+# add missing function to GLX_NV_copy_image
+	cat >> $1/GLX_NV_copy_image <<EOT
+  void glXCopyImageSubDataNV (Display *dpy, GLXContext srcCtx, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLXContext dstCtx, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei width, GLsizei height, GLsizei depth)
+EOT
+
+# add missing function to WGL_NV_copy_image
+	cat >> $1/WGL_NV_copy_image <<EOT
+  BOOL wglCopyImageSubDataNV (HGLRC hSrcRC, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, HGLRC hDstRC, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei width, GLsizei height, GLsizei depth)
+EOT
 
 # clean up
     rm -f $1/*.bak

@@ -1,5 +1,5 @@
 WGL_I3D_genlock
-http://oss.sgi.com/projects/ogl-sample/registry/I3D/wgl_genlock.txt
+http://www.opengl.org/registry/specs/I3D/wgl_genlock.txt
 	WGL_GENLOCK_SOURCE_MULTIVIEW_I3D 0x2044
 	WGL_GENLOCK_SOURCE_EXTERNAL_SYNC_I3D 0x2045
 	WGL_GENLOCK_SOURCE_EXTERNAL_FIELD_I3D 0x2046

@@ -1,5 +1,5 @@
 GL_INGR_color_clamp
-http://oss.sgi.com/projects/ogl-sample/registry/INGR/color_clamp.txt
+http://www.opengl.org/registry/specs/INGR/color_clamp.txt
 	GL_RED_MIN_CLAMP_INGR 0x8560
 	GL_GREEN_MIN_CLAMP_INGR 0x8561
 	GL_BLUE_MIN_CLAMP_INGR 0x8562

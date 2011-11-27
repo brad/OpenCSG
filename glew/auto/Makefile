@@ -1,5 +1,5 @@
-## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
-## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
+## Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -11,7 +11,8 @@ include ../config/version
 
 SHELL = bash
 REGISTRY = registry
-REGISTRY_URL = http://oss.sgi.com/projects/ogl-sample/registry/
+REGISTRY_URL = http://www.opengl.org/registry/
+#http://oss.sgi.com/projects/ogl-sample/registry/
 BIN = bin
 SRC = src
 CORE = core
@@ -59,6 +60,12 @@ S.TARGETS = \
 endif
 
 D.TARGETS = \
+	$(D.DEST)/index.html \
+	$(D.DEST)/install.html \
+	$(D.DEST)/basic.html \
+	$(D.DEST)/advanced.html \
+	$(D.DEST)/credits.html \
+	$(D.DEST)/log.html \
 	$(D.DEST)/glew.html \
 	$(D.DEST)/wglew.html \
 	$(D.DEST)/glxew.html
@@ -78,10 +85,6 @@ $(REGISTRY)/.dummy: $(BIN)/update_registry.sh
 	@echo "Downloading registry"
 	@echo "--------------------------------------------------------------------"
 	$(BIN)/update_registry.sh $(REGISTRY) $(REGISTRY_URL)
-	head -6 $(REGISTRY)/ATI/texture_env_combine3.txt > tmp
-	tail +7 $(REGISTRY)/ATI/texture_env_combine3.txt | \
-	perl -e 's/ATI\_/GL\_ATI\_/g;' -p >> tmp
-	mv -f tmp $(REGISTRY)/ATI/texture_env_combine3.txt
 	touch $@
 
 $(EXT)/.dummy: $(REGISTRY)/.dummy
@@ -105,7 +108,8 @@ $(I.DEST)/glew.h: $(EXT)/.dummy
 	@echo "--------------------------------------------------------------------"
 	test -d $(I.DEST) || mkdir -p $(I.DEST)
 	cp -f $(SRC)/glew_license.h $@
-	cat $(SRC)/sgi_license.h >> $@
+	cat $(SRC)/mesa_license.h >> $@
+	cat $(SRC)/khronos_license.h >> $@
 	cat $(SRC)/glew_head.h >> $@
 	$(BIN)/make_header.pl GLAPIENTRY GL $(GL_CORE_SPEC) >> $@
 	$(BIN)/make_header.pl GLAPIENTRY GL $(GL_EXT_SPEC) >> $@
@@ -125,6 +129,7 @@ $(I.DEST)/wglew.h: $(EXT)/.dummy
 	@echo "Creating wglew.h"
 	@echo "--------------------------------------------------------------------"
 	cp -f $(SRC)/glew_license.h $@
+	cat $(SRC)/khronos_license.h >> $@
 	cat $(SRC)/wglew_head.h >> $@
 	$(BIN)/make_header.pl WINAPI WGL $(WGL_EXT_SPEC) >> $@
 	echo -e "/* ------------------------------------------------------------------------- */\n\n#ifdef GLEW_MX\n#define WGLEW_EXPORT\n#else\n#define WGLEW_EXPORT GLEWAPI\n#endif /* GLEW_MX */\n\n#ifdef GLEW_MX\nstruct WGLEWContextStruct\n{\n#endif /* GLEW_MX */" >> $@
@@ -138,7 +143,8 @@ $(I.DEST)/glxew.h: $(EXT)/.dummy
 	@echo "Creating glxew.h"
 	@echo "--------------------------------------------------------------------"
 	cp -f $(SRC)/glew_license.h $@
-	cat $(SRC)/glx_license.h >> $@
+	cat $(SRC)/mesa_license.h >> $@
+	cat $(SRC)/khronos_license.h >> $@
 	cat $(SRC)/glxew_head.h >> $@
 	$(BIN)/make_header.pl '' GLX $(GLX_CORE_SPEC) >> $@
 	$(BIN)/make_header.pl '' GLX $(GLX_EXT_SPEC) >> $@
@@ -206,6 +212,9 @@ $(S.DEST)/glew.c: $(EXT)/.dummy
 	$(BIN)/make_str.pl $(GLX_CORE_SPEC) $(GLX_EXT_SPEC) >> $@
 	cat $(SRC)/glew_str_tail.c >> $@
 	perl -e "s/GLEW_VERSION_STRING/$(GLEW_VERSION)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MAJOR_STRING/$(GLEW_MAJOR)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MINOR_STRING/$(GLEW_MINOR)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MICRO_STRING/$(GLEW_MICRO)/g" -pi $@
 	perl -e "s/GLEW_ARB_vertex_shader = !_glewInit_GL_ARB_vertex_shader\(GLEW_CONTEXT_ARG_VAR_INIT\);/{ GLEW_ARB_vertex_shader = !_glewInit_GL_ARB_vertex_shader(GLEW_CONTEXT_ARG_VAR_INIT); _glewInit_GL_ARB_vertex_program(GLEW_CONTEXT_ARG_VAR_INIT); }/g" -pi $@
 	perl -e "s/\(\(glColorSubTable = /((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcAddress((const GLubyte*)\"glBlendEquation\")) == NULL) || r;\n  r = ((glColorSubTable = /g" -pi $@
 	$(BIN)/fix_OML_sync_control.sh $@
@@ -259,6 +268,9 @@ $(S.DEST)/glew_init.c: $(EXT)/.dummy
 	echo -e "\n  return GLEW_OK;\n}\n\n#endif /* !__APPLE__ || GLEW_APPLE_GLX */\n" >> $@;
 	cat $(SRC)/glew_init_tail.c >> $@
 	perl -e "s/GLEW_VERSION_STRING/$(GLEW_VERSION)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MAJOR_STRING/$(GLEW_MAJOR)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MINOR_STRING/$(GLEW_MINOR)/g" -pi $@
+	perl -e "s/GLEW_VERSION_MICRO_STRING/$(GLEW_MICRO)/g" -pi $@
 	perl -e "s/GLEW_ARB_vertex_shader = !_glewInit_GL_ARB_vertex_shader\(GLEW_CONTEXT_ARG_VAR_INIT\);/{ GLEW_ARB_vertex_shader = !_glewInit_GL_ARB_vertex_shader(GLEW_CONTEXT_ARG_VAR_INIT); _glewInit_GL_ARB_vertex_program(GLEW_CONTEXT_ARG_VAR_INIT); }/g" -pi $@
 	perl -e "s/\(\(glBlendColor = /((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcAddress((const GLubyte*)\"glBlendEquation\")) == NULL) || r;\n  r = ((glBlendColor = /g" -pi $@
 	$(BIN)/fix_OML_sync_control.sh $@
@@ -305,33 +317,46 @@ $(S.DEST)/glewinfo.c: $(EXT)/.dummy
 	cat $(SRC)/glewinfo_tail.c >> $@
 	$(BIN)/fix_OML_sync_control.sh $@
 	perl -e 's/"glColorSubTable"/"glBlendEquation", glBlendEquation == NULL);\n  glewInfoFunc("glColorSubTable"/g' -pi $@
+	rm -f $@.bak
+
+# Update documentation
+
+$(D.DEST)/%.html: doc/%.html
+	@echo "--------------------------------------------------------------------"
+	@echo "Creating $(@F)"
+	@echo "--------------------------------------------------------------------"
+	cat $(SRC)/header.html $< $(SRC)/footer.html | \
+  sed 's#<a href="$(@F)">\(.*\)</a>#\1#' > $@
 
 $(D.DEST)/glew.html: $(EXT)/.dummy
 	@echo "--------------------------------------------------------------------"
 	@echo "Creating glew.html"
 	@echo "--------------------------------------------------------------------"
-	cp -f $(SRC)/template.html $@
+	cp -f $(SRC)/header.html $@
 	echo -e "<h2>Supported OpenGL Extensions</h2>\n" >> $@
 	$(BIN)/make_html.pl $(GL_EXT_SPEC) >> $@
-	echo -e "</td>\n</tr>\n</table>\n</body>" >> $@
+	cat $(SRC)/footer.html >> $@
+	sed -i 's#<a href="$(@F)">\(.*\)</a>#\1#' $@
 
 $(D.DEST)/wglew.html: $(EXT)/.dummy
 	@echo "--------------------------------------------------------------------"
 	@echo "Creating wglew.html"
 	@echo "--------------------------------------------------------------------"
-	cp -f $(SRC)/template.html $@
+	cp -f $(SRC)/header.html $@
 	echo -e "<h2>Supported WGL Extensions</h2>\n" >> $@
 	$(BIN)/make_html.pl $(WGL_EXT_SPEC) >> $@
-	echo -e "</td>\n</tr>\n</table>\n</body>" >> $@
+	cat $(SRC)/footer.html >> $@
+	sed -i 's#<a href="$(@F)">\(.*\)</a>#\1#' $@
 
 $(D.DEST)/glxew.html: $(EXT)/.dummy
 	@echo "--------------------------------------------------------------------"
 	@echo "Creating glxew.html"
 	@echo "--------------------------------------------------------------------"
-	cp -f $(SRC)/template.html $@
+	cp -f $(SRC)/header.html $@
 	echo -e "<h2>Supported GLX Extensions</h2>\n" >> $@
 	$(BIN)/make_html.pl $(GLX_EXT_SPEC) >> $@
-	echo -e "</td>\n</tr>\n</table>\n</body>" >> $@
+	cat $(SRC)/footer.html >> $@
+	sed -i 's#<a href="$(@F)">\(.*\)</a>#\1#' $@
 
 $(B.DEST)/%.rc: src/%.rc $(EXT)/.dummy
 	perl -e "s/GLEW_MAJOR/$(GLEW_MAJOR)/g;s/GLEW_MINOR/$(GLEW_MINOR)/g;s/GLEW_MICRO/$(GLEW_MICRO)/g;" -p $< > $@

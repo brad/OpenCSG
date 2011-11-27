@@ -1,3 +1,15 @@
+05.11.2009
+    Changed: frame buffer objects are now used by default
+        (instead of pbuffers)
+
+03.08.2009
+    Added: support for ARB frame buffer objects (in addition
+        to EXT frame buffer objects)
+
+22.07.2009
+    Fixed: uninitialized variable in framebuffer object path.
+        Might have caused the visibility transfer to fail.
+
 19.07.2009
     Release 1.1.1
 
@@ -9,11 +21,24 @@
     Fixed: removed -athlon-xp optimization in makefile, which was 
         not portable obviously, in particular for x64 platforms.
 
+30.09.2007
+    Changed: made a default and a legacy render() function for
+        interface cleanup and more logical documentation in the
+        header file. 
+
+23.09.2007
+    Added: made depth bounds optimization configurable, default off. 
+
 15.08.2007
     Fixed: stencil mask was not reset after doing the parity test.
         Then, the stencil buffer was not fully reset in the next
         glClear(GL_STENCIL_BUFFER_BIT). Bug only manifested in layered
         Goldfeather algorithms with FBO.
+
+08.08.2007
+    Added: Support for depth bounds extension for performance improvements.
+        Currently, standard Goldfeather and all SCS algorithms use this
+        functionality. 
 
 03.12.2006
     Release 1.1.0

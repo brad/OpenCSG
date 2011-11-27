@@ -1,5 +1,5 @@
 GL_SGIX_fragment_specular_lighting
-http://oss.sgi.com/projects/ogl-sample/registry/SGIX/fragment_specular_lighting.txt
+http://www.opengl.org/registry/specs/SGIX/fragment_specular_lighting.txt
 	void glFragmentColorMaterialSGIX (GLenum face, GLenum mode)
 	void glFragmentLightModelfSGIX (GLenum pname, GLfloat param)
 	void glFragmentLightModelfvSGIX (GLenum pname, GLfloat* params)

@@ -1,5 +1,5 @@
 GL_PGI_misc_hints
-http://oss.sgi.com/projects/ogl-sample/registry/PGI/misc_hints.txt
+http://www.opengl.org/registry/specs/PGI/misc_hints.txt
 	GL_PREFER_DOUBLEBUFFER_HINT_PGI 107000
 	GL_CONSERVE_MEMORY_HINT_PGI 107005
 	GL_RECLAIM_MEMORY_HINT_PGI 107006

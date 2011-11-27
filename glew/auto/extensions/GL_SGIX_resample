@@ -1,5 +1,5 @@
 GL_SGIX_resample
-http://oss.sgi.com/projects/ogl-sample/registry/SGIX/resample.txt
+http://www.opengl.org/registry/specs/SGIX/resample.txt
 	GL_PACK_RESAMPLE_SGIX 0x842E
 	GL_UNPACK_RESAMPLE_SGIX 0x842F
 	GL_RESAMPLE_DECIMATE_SGIX 0x8430

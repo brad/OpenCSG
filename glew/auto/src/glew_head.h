@@ -2,7 +2,7 @@
 #define __glew_h__
 #define __GLEW_H__
 
-#if defined(__gl_h_) || defined(__GL_H__)
+#if defined(__gl_h_) || defined(__GL_H__) || defined(__X_GL_H)
 #error gl.h included before glew.h
 #endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
@@ -14,11 +14,12 @@
 
 #define __gl_h_
 #define __GL_H__
+#define __X_GL_H
 #define __glext_h_
 #define __GLEXT_H_
 #define __gl_ATI_h_
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(_WIN32)
 
 /*
  * GLEW does not include <windows.h> to avoid name space pollution.
@@ -28,7 +29,7 @@
 /* <windef.h> */
 #ifndef APIENTRY
 #define GLEW_APIENTRY_DEFINED
-#  if defined(__CYGWIN__) || defined(__MINGW32__)
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
 #    define APIENTRY __stdcall
 #  elif (_MSC_VER >= 800) || defined(_STDCALL_SUPPORTED) || defined(__BORLANDC__)
 #    define APIENTRY __stdcall
@@ -37,14 +38,14 @@
 #  endif
 #endif
 #ifndef GLAPI
-#  if defined(__CYGWIN__) || defined(__MINGW32__)
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
 #    define GLAPI extern
 #  endif
 #endif
 /* <winnt.h> */
 #ifndef CALLBACK
 #define GLEW_CALLBACK_DEFINED
-#  if defined(__CYGWIN__) || defined(__MINGW32__)
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
 #    define CALLBACK __attribute__ ((__stdcall__))
 #  elif (defined(_M_MRX000) || defined(_M_IX86) || defined(_M_ALPHA) || defined(_M_PPC)) && !defined(MIDL_PASS)
 #    define CALLBACK __stdcall
@@ -64,7 +65,7 @@ typedef unsigned short wchar_t;
 #endif
 /* <stddef.h> */
 #if !defined(_W64)
-#  if !defined(__midl) && (defined(_X86_) || defined(_M_IX86)) && _MSC_VER >= 1300
+#  if !defined(__midl) && (defined(_X86_) || defined(_M_IX86)) && defined(_MSC_VER) && _MSC_VER >= 1300
 #    define _W64 __w64
 #  else
 #    define _W64
@@ -81,7 +82,7 @@ typedef _W64 int ptrdiff_t;
 #endif
 
 #ifndef GLAPI
-#  if defined(__CYGWIN__) || defined(__MINGW32__)
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
 #    define GLAPI extern
 #  else
 #    define GLAPI WINGDIAPI
@@ -118,6 +119,7 @@ typedef _W64 int ptrdiff_t;
  */
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define GLEW_APIENTRY_DEFINED
 #define APIENTRY
@@ -142,41 +144,40 @@ extern "C" {
 #ifndef GL_VERSION_1_1
 #define GL_VERSION_1_1 1
 
-#if defined(__APPLE__)
-typedef unsigned long GLenum;
-typedef unsigned long GLbitfield;
-typedef unsigned long GLuint;
-typedef long GLint;
-typedef long GLsizei;
-#else
 typedef unsigned int GLenum;
 typedef unsigned int GLbitfield;
 typedef unsigned int GLuint;
 typedef int GLint;
 typedef int GLsizei;
-#endif
 typedef unsigned char GLboolean;
 typedef signed char GLbyte;
 typedef short GLshort;
 typedef unsigned char GLubyte;
 typedef unsigned short GLushort;
+typedef unsigned long GLulong;
 typedef float GLfloat;
 typedef float GLclampf;
 typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
-#if defined(_MSC_VER) && _MSC_VER < 1400
-#  ifdef _WIN64
+#if defined(_MSC_VER)
+#  if _MSC_VER < 1400
 typedef __int64 GLint64EXT;
 typedef unsigned __int64 GLuint64EXT;
 #  else
-typedef _W64 int GLint64EXT;
-typedef _W64 unsigned int GLuint64EXT;
-#  endif
-#else
 typedef signed long long GLint64EXT;
 typedef unsigned long long GLuint64EXT;
+#  endif
+#else
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
+#include <inttypes.h>
+#  endif
+typedef int64_t GLint64EXT;
+typedef uint64_t GLuint64EXT;
 #endif
+typedef GLint64EXT  GLint64;
+typedef GLuint64EXT GLuint64;
+typedef struct __GLsync *GLsync;
 
 #define GL_ACCUM 0x0100
 #define GL_LOAD 0x0101

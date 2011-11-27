@@ -1,5 +1,5 @@
 GL_ATI_draw_buffers
-http://oss.sgi.com/projects/ogl-sample/registry/ATI/draw_buffers.txt
+http://www.opengl.org/registry/specs/ATI/draw_buffers.txt
 	GL_MAX_DRAW_BUFFERS_ATI 0x8824
 	GL_DRAW_BUFFER0_ATI 0x8825
 	GL_DRAW_BUFFER1_ATI 0x8826

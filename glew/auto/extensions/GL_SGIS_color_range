@@ -1,5 +1,5 @@
 GL_SGIS_color_range
-http://oss.sgi.com/projects/ogl-sample/registry/SGIS/color_range.txt
+http://www.opengl.org/registry/specs/SGIS/color_range.txt
 	GL_EXTENDED_RANGE_SGIS 0x85A5
 	GL_MIN_RED_SGIS 0x85A6
 	GL_MAX_RED_SGIS 0x85A7

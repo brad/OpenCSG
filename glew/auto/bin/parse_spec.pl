@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
-## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
+## Copyright (C) 2002-2008, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2002-2008, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -44,9 +44,14 @@ my %typemap = (
     uint     => "GLuint",
     ushort   => "GLushort",
     DMbuffer => "void *",
+    # Nvidia video output fsck up
+    int64EXT => "GLint64EXT",
+    uint64EXT=> "GLuint64EXT",
 
     # ARB VBO introduces these.
 
+    sizeiptr => "GLsizeiptr",
+    intptr   => "GLintptr",
     sizeiptrARB => "GLsizeiptrARB",
     intptrARB   => "GLintptrARB",
 
@@ -54,6 +59,12 @@ my %typemap = (
     # handleARB is at least 32 bits
     charARB => "GLcharARB",
     handleARB => "GLhandleARB",
+
+    # OpenGL 3.2 and GL_ARB_sync
+
+    int64  => "GLint64",
+    uint64 => "GLuint64",
+    sync   => "GLsync",
 
     # GLX 1.3 defines new types which might not be available at compile time
 
@@ -107,6 +118,8 @@ my %fnc_ignore_list = (
     "ProgramLocalParameter4fARB"    => "ARB_vertex_program",
     "ProgramLocalParameter4fvARB"   => "ARB_vertex_program",
     "ProgramStringARB"              => "ARB_vertex_program",
+    "glXCreateContextAttribsARB"    => "ARB_create_context_profile",
+    "wglCreateContextAttribsARB"    => "WGL_ARB_create_context_profile",
 );
 
 my %regex = (
@@ -126,8 +139,10 @@ sub normalize_prototype
 {
     local $_ = join(" ", @_);
     s/\s+/ /g;                # multiple whitespace -> single space
+    s/\<.*\>//g;              # remove <comments> from direct state access extension
+    s/\<.*$//g;               # remove incomplete <comments> from direct state access extension
     s/\s*\(\s*/ \(/;          # exactly one space before ( and none after
-    s/\s*\)\s*/\)/;           # no after before or after )
+    s/\s*\)\s*/\)/;           # no space before or after )
     s/\s*\*([a-zA-Z])/\* $1/; # "* identifier"
     s/\*wgl/\* wgl/;          # "* wgl"
     s/\*glX/\* glX/;          # "* glX"
@@ -266,7 +281,8 @@ my @speclist = ();
 my %extensions = ();
 
 my $ext_dir = shift;
-my $reg_http = "http://oss.sgi.com/projects/ogl-sample/";
+my $reg_http = "http://www.opengl.org/registry/specs/";
+#my $reg_http = "http://oss.sgi.com/projects/ogl-sample/";
 
 # Take command line arguments or read list from file
 if (@ARGV)
@@ -286,7 +302,9 @@ foreach my $spec (sort @speclist)
         my $info = "$ext_dir/" . $ext;
         open EXT, ">$info";
         print EXT $ext . "\n";
-        print EXT $reg_http . $spec . "\n";
+		my $specname = $spec;
+		$specname =~ s/registry\///;
+        print EXT $reg_http . $specname . "\n";
 
         my $prefix = $ext;
         $prefix =~ s/^(.+?)(_.+)$/$1/;
@@ -294,7 +312,7 @@ foreach my $spec (sort @speclist)
         {
             if ($token =~ /^$prefix\_.*/i)
             {
-                print EXT "\t" . $token . " " . ${%{$tokens}}{$token} . "\n";
+                print EXT "\t" . $token . " " . ${\%{$tokens}}{$token} . "\n";
             }
         }
         foreach my $function (sort keys %{$functions})
