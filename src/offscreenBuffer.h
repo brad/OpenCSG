@@ -24,6 +24,7 @@
 #define __OpenCSG__offscreen_buffer_h__
 
 #include "opencsgConfig.h"
+#include <opencsg.h>
 
 namespace OpenCSG {
 
@@ -41,6 +42,9 @@ namespace OpenCSG {
             virtual bool Initialize(int width, int height, 
                                     bool shareObjects=true, 
                                     bool copyContext=false) = 0;
+
+            /// checks whether Initialize has been called before or not
+            virtual bool IsInitialized() const = 0;
 
             /// Change the render texture format.
             virtual bool Reset() = 0;
@@ -73,9 +77,14 @@ namespace OpenCSG {
             virtual bool haveSeparateContext() const = 0;
         };
 
-        /// checks the OpenGL-extensions resp. the current settings
-        /// and returns a concrete offscreen buffer.
-        OffscreenBuffer* getOffscreenBuffer(bool fbo);
+        /// Checks the OpenGL-extensions resp. the current settings
+        /// and returns a concrete offscreen buffer, for the currently
+        /// active context in OpenCSG.
+        OffscreenBuffer* getOffscreenBuffer(OffscreenType type);
+
+        /// Frees all offscreen buffers allocated for the currently
+        /// active context in OpenCSG.
+        void freeResources();
 
     } // namespace OpenGL
 

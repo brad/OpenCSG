@@ -39,13 +39,13 @@ namespace OpenCSG {
         ScissorMemo* scissor;
 
         struct RenderData {
-            unsigned int stencilID_;
+            unsigned int stencilID;
         };
 
-        std::map<Primitive*, RenderData> renderInfo_;
+        std::map<Primitive*, RenderData> gRenderInfo;
 
         RenderData* getRenderData(Primitive* primitive) {
-            RenderData* dta = &(renderInfo_.find(primitive))->second;
+            RenderData* dta = &(gRenderInfo.find(primitive))->second;
             return dta;
         }
     
@@ -75,8 +75,32 @@ namespace OpenCSG {
                 for (std::vector<Primitive*>::const_iterator j = primitives.begin(); j != primitives.end(); ++j) {
                     glCullFace((*j)->getOperation() == Intersection ? GL_BACK : GL_FRONT);
                     RenderData* primitiveData = getRenderData(*j);
-                    unsigned char id = primitiveData->stencilID_;
-                    glAlphaFunc(GL_EQUAL, static_cast<float>(id) / 255.0f);
+                    unsigned char id = primitiveData->stencilID;
+
+                    // Here is an interesting bug, which happened on an ATI HD4670, but actually
+                    // might happen on every hardware. I am not sure whether it can be solved 
+                    // correctly.
+
+                    // Problem is that in optimized mode with some compilers (VC6, Visual Studio 2003
+                    // in particular), when setting the alpha func as follows:
+                    // glAlphaFunc(GL_EQUAL, static_cast<float>(id) / 255.0f);
+                    // the division is optimized as multiplication with 1.0f/255.0f.
+                    // This is a fine and valid optimization. Unfortunately, the results
+                    // are not exactly the same as the direct division for some ids.
+                    // Which is apparently what the ATI driver is doing internally.
+                    // So with comparison with GL_EQUAL fails. 
+
+                    // Fortunately the OpenGL standard enforces that the mapping of color byte
+                    // values to float fragment values be done by division. So if the
+                    // solution found below (just working at double precision) proves
+                    // to work once, it should work forever, such that a precompiling
+                    // lookup table containing the correct alpha reference values is 
+                    // not required. However a bad feeling remains.
+
+                    double alpha = static_cast<double>(id) / 255.0;
+                    GLfloat fAlpha = static_cast<float>(alpha);
+                    glAlphaFunc(GL_EQUAL, fAlpha);
+
                     (*j)->render();
                 }
             }
@@ -94,14 +118,13 @@ namespace OpenCSG {
 
         class IDGenerator {
         public:
-            IDGenerator() { currentID_ = 0; };
-            unsigned int newID() { return ++currentID_; };
+            IDGenerator() { currentID = 0; };
+            unsigned int newID() { return ++currentID; };
 
         private:
-            unsigned int currentID_;
+            unsigned int currentID;
         };
 
-        IDGenerator* IDGenerator_;
         SCSChannelManager* channelMgr;
 
         void renderIntersectedFront(const std::vector<Primitive*>& primitives) {
@@ -117,7 +140,7 @@ namespace OpenCSG {
                 glCullFace(GL_BACK);
                 glEnable(GL_CULL_FACE);
                 RenderData* primitiveData = getRenderData(primitives[0]);
-                GLubyte b = primitiveData->stencilID_; glColor4ub(b, b, b, b);
+                GLubyte b = primitiveData->stencilID; glColor4ub(b, b, b, b);
                 primitives[0]->render();
                 glDisable(GL_CULL_FACE);
                 glDepthFunc(GL_LESS);
@@ -135,7 +158,7 @@ namespace OpenCSG {
             {
                 for (std::vector<Primitive*>::const_iterator i = primitives.begin(); i != primitives.end(); ++i) {
                     RenderData* primitiveData = getRenderData(*i);
-                    GLubyte b = primitiveData->stencilID_; glColor4ub(b, b, b, b);
+                    GLubyte b = primitiveData->stencilID; glColor4ub(b, b, b, b);
                     (*i)->render();
                 }
             }
@@ -220,7 +243,7 @@ namespace OpenCSG {
                 { 
                     for (Batch::const_iterator j = i->begin(); j != i->end(); ++j) {            
                         RenderData* primitiveData = getRenderData(*j);
-                        GLubyte b = primitiveData->stencilID_; glColor4ub(b, b, b, b);
+                        GLubyte b = primitiveData->stencilID; glColor4ub(b, b, b, b);
                         (*j)->render();
                     }
                 }
@@ -304,7 +327,7 @@ namespace OpenCSG {
                 { 
                     for (Batch::const_iterator j = i->begin(); j != i->end(); ++j) {            
                         RenderData* primitiveData = getRenderData(*j);
-                        GLubyte b = primitiveData->stencilID_; glColor4ub(b, b, b, b);
+                        GLubyte b = primitiveData->stencilID; glColor4ub(b, b, b, b);
                         (*j)->render();
                     }
                 }
@@ -354,22 +377,27 @@ namespace OpenCSG {
 
     void renderSCS(const std::vector<Primitive*>& primitives, DepthComplexityAlgorithm algorithm) {
 
-        renderInfo_.clear();
-
-        IDGenerator_ = new IDGenerator();
-
         channelMgr = new SCSChannelManager;
+        if (!channelMgr->init())
+        {
+            delete channelMgr;
+            return;
+        }
+
+        gRenderInfo.clear();
+
         scissor = new ScissorMemo;
 
         std::vector<Primitive*> intersected; intersected.reserve(primitives.size());
         std::vector<Primitive*> subtracted;  subtracted.reserve(primitives.size());
 
         {
+            IDGenerator IDMaker;
             for (std::vector<Primitive*>::const_iterator itr = primitives.begin(); itr != primitives.end(); ++itr) {
                 {
                     RenderData dta; 
-                    dta.stencilID_ = IDGenerator_->newID();
-                    renderInfo_.insert(std::make_pair(*itr, dta));
+                    dta.stencilID = IDMaker.newID();
+                    gRenderInfo.insert(std::make_pair(*itr, dta));
                 }
                 Operation operation= (*itr)->getOperation();
                 if (operation == Intersection) {
@@ -432,8 +460,6 @@ namespace OpenCSG {
 
         delete scissor;
         delete channelMgr;
-
-        delete IDGenerator_;
     }
 
 } // namespace OpenCSG

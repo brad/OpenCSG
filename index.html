@@ -41,7 +41,7 @@
 
 <hr>
 
-<h3> <a href="news.html">Latest release: OpenCSG 1.2.0 (03.01.2010)</a></h3>
+<h3> <a href="news.html">Latest release: OpenCSG 1.3.0 (07.02.2010)</a></h3>
 
 <hr>
 
@@ -51,7 +51,7 @@
 OpenCSG is a library that does image-based CSG rendering using OpenGL. 
 OpenCSG is written in C++ and supports most modern graphics hardware using
 Microsoft Windows or the Linux operating system. 
-<a href="OpenCSG-1.2.0.tar.gz">OpenCSG-1.2.0</a> is the current version.
+<a href="OpenCSG-1.3.0.tar.gz">OpenCSG-1.3.0</a> is the current version.
 </p>
 
 <p>
@@ -253,10 +253,14 @@ namespace OpenCSG { <br>
 <br>
 &nbsp; enum <b><a href="#algorithm">Algorithm</a></b> { <b>Automatic</b>, <b>Goldfeather</b>, <b>SCS</b> }; <br>
 &nbsp; enum <b><a href="#depthalgorithm">DepthComplexityAlgorithm</a></b> { <b>NoDepthComplexitySampling</b>, <b>OcclusionQuery</b>, <b>DepthComplexitySampling</b> }; <br>
-&nbsp; enum <b><a href="#offscreentype">OffscreenType</a></b> { <b>AutomaticOffscreenType</b>, <b>FrameBufferObject</b>, <b>PBuffer</b> }; <br>
+&nbsp; enum <b><a href="#offscreentype">OffscreenType</a></b> { <b>AutomaticOffscreenType</b>, <b>FrameBufferObject</b>, <b>PBuffer</b>, <b>FrameBufferObjectARB</b>, <b>FrameBufferObjectEXT</b> }; <br>
 &nbsp; enum <b><a href="#optimization">Optimization</a></b> { <b>OptimizationDefault</b>, <b>OptimizationDefault</b>, <b>OptimizationOn</b>, <b>OptimizationOff</b> }; <br>
 <br>
 &nbsp; void <b><a href="#rendershape">render</a></b>(const std::vector&lt;Primitive*&gt;&amp; primitives); <br>
+<br>
+&nbsp; void <b><a href="#context">setContext</a></b>(int context); <br>
+&nbsp; int <b><a href="#context">getContext</a></b>(); <br>
+&nbsp; void <b><a href="#context">freeResources</a></b>(); <br>
 } <br>
 </code>
 </p>
@@ -358,8 +362,14 @@ for profiting from depth complexity.
 <a name="offscreentype"></a>
 The offscreen type specifies what kind of offscreen buffer OpenCSG uses for
 internal CSG calculations. The default <code>AutomaticOffscreenType</code>
-typically chooses the <code>PBuffer</code> setting currently. The other
-option you can choose is the <code>FrameBufferObject</code> option. Using
+preferably uses, if the required OpenGL extensions are available,
+<code>FrameBufferObjectARB</code>, then <code>PBuffer</code>, then <code>FrameBufferObjectEXT</code>.
+The <code>FrameBufferObject</code> uses preferably <code>FrameBufferObjectARB</code>,
+then <code>FrameBufferObjectEXT</code>. These priorities are subject to change
+between different releases based on experiences with compatibility of OpenCSG
+with different extensions and graphics hardware. The remaining settings <code>PBuffer</code>,
+<code>FrameBufferObjectARB</code>, and <code>FrameBufferObjectEXT</code> directly map
+to the usage of the corresponding OpenGL extension. Overall, using
 frame buffer objects is potentially faster, because they do not impose
 a separate rendering context for the offscreen buffer and hence require
 no context switching. In typical scenarios, there is no difference though.
@@ -376,6 +386,20 @@ otherwise they will not be correctly rendered. The gains you will get
 from this optimization is probably only small. 
 </p>
 
+<p>
+<a name="context"></a>
+OpenCSG creates, and reuses between different <code>render()</code> calls,
+various OpenGL resources such as PBuffers or frame buffer objects. This
+may be a problem in MDI applications with several OpenGL windows, of which
+the OpenGL contexts are not shared. In this case, OpenGL resources allocated
+in one OpenGL context cannot be reused with another context, so OpenCSG
+would produce rendering errors. To solve this, the OpenCSG context
+can be set to some unique integer identifier of the OpenGL window.
+OpenCSG then creates/uses OpenGL resources in the <code>render()</code>
+function per context. The function <code>freeResources()</code> frees
+OpenGL resources for the currently active OpenCSG context. 
+</p>
+
 <center><a href="http://www.opencsg.org/img/grid.jpg"><img src="img/grid.gif" border="0" alt="CSG grid"></a></center>
 
 <hr>
@@ -383,13 +407,14 @@ from this optimization is probably only small.
 <h3> <a name="download">Download</a> </h3>
 
 <p>
-Download <a href="http://www.opencsg.org/OpenCSG-1.2.0.tar.gz">OpenCSG-1.2.0.tar.gz</a>. The archive contains all required helper
+Download <a href="http://www.opencsg.org/OpenCSG-1.3.0.tar.gz">OpenCSG-1.3.0.tar.gz</a>. The archive contains all required helper
 libraries, i.e., also RenderTexture and GLEW. It comes with 
 makefiles for Linux and with project files for MSVC6, VS2003, and Dev-C++ 5.
 </p>
 
 <p>
 The older versions <br>
+&nbsp;&nbsp; <a href="http://www.opencsg.org/OpenCSG-1.2.0.tar.gz">OpenCSG-1.2.0</a>, <br>
 &nbsp;&nbsp; <a href="http://www.opencsg.org/OpenCSG-1.1.1.tar.gz">OpenCSG-1.1.1</a>, <br>
 &nbsp;&nbsp; <a href="http://www.opencsg.org/OpenCSG-1.1.0.tar.gz">OpenCSG-1.1.0</a>, <br>
 &nbsp;&nbsp; <a href="http://www.opencsg.org/OpenCSG-1.0.2.zip">OpenCSG-1.0.2</a>, <br>
@@ -429,6 +454,16 @@ Currently, I know of the following applications making use of OpenCSG:
 	MS Windows allows to compose textured CSG shapes from a set of predefined primitives. The application
 	contains a very good online help that depicts nicely what CSG is about, and that furthermore
 	contains some tutorial how to create 1) a graphical widget and 2) a pipe.
+</td>
+</tr>
+<tr>
+<td valign="top" style="text-align: center;"><a href="http://openscad.org/"><img src="img/openscad.png" alt="Icon for OpenSCAD" /></a></td>
+<td>
+	<a href="http://openscad.org/">OpenSCAD</a> is a software
+	for creating solid 3D CAD objects by means of a scripting language.
+	It supports interactive preview of the CSG geometry as well as
+	exporting the final geometry as 3D model. There are precompiled
+	binaries for Linux, Windows, and MacOS X. 
 </td>
 </tr>
 </tbody>
@@ -570,7 +605,7 @@ their respective authors.
 <center><p>
 &copy; 2002-2010, Florian Kirsch, e-mail: <b>mail at opencsg dot org</b>, <br>
 2002-2005 Hasso-Plattner-Institute Potsdam.<br>
-Last change: 03.01.2010
+Last change: 07.02.2010
 </p></center>
 
 </body>

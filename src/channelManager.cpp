@@ -36,7 +36,6 @@
 namespace OpenCSG {
 
     OpenCSG::OpenGL::OffscreenBuffer* ChannelManager::gOffscreenBuffer = 0;
-                                  int ChannelManager::gOffscreenType = OpenCSG::AutomaticOffscreenType;
                                  bool ChannelManager::gInUse = false;
     
     namespace {
@@ -96,9 +95,6 @@ namespace OpenCSG {
 
     ChannelManager::ChannelManager() {
 
-        assert(!gInUse);      
-        gInUse = true;
-
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glDisable(GL_LIGHTING);
@@ -120,6 +116,14 @@ namespace OpenCSG {
             OpenGL::scissorPos[2] = OpenGL::canvasPos[2];
             OpenGL::scissorPos[3] = OpenGL::canvasPos[3];
         }
+    }
+
+    bool ChannelManager::init() {
+
+        assert(!gInUse);
+        if (gInUse)
+            return false;
+        gInUse = true;
 
         const int dx = OpenGL::canvasPos[2] - OpenGL::canvasPos[0];
         const int dy = OpenGL::canvasPos[3] - OpenGL::canvasPos[1];
@@ -153,64 +157,71 @@ namespace OpenCSG {
         }
 
         bool rebuild = false;
-        int newOffscreenType = getOption(OffscreenSetting);
-        if (!gOffscreenBuffer || (gOffscreenType != newOffscreenType)) {
-            gOffscreenType = newOffscreenType;
-            if (newOffscreenType == OpenCSG::AutomaticOffscreenType) {
-                if (GLEW_ARB_framebuffer_object) {
-                    newOffscreenType = OpenCSG::FrameBufferObject;
-                }
-                else 
-                if (   GLEW_EXT_framebuffer_object
-                    && GLEW_EXT_packed_depth_stencil
-                ) {
-                    newOffscreenType = OpenCSG::FrameBufferObject;
-                }
-                else
+        OffscreenType newOffscreenType = static_cast<OffscreenType>(getOption(OffscreenSetting));
+
+        if (   newOffscreenType == OpenCSG::AutomaticOffscreenType
+            || newOffscreenType == OpenCSG::FrameBufferObject
+        ) {
+            if (GLEW_ARB_framebuffer_object) {
+                newOffscreenType = OpenCSG::FrameBufferObjectARB;
+            }
+            else
+            if (newOffscreenType == OpenCSG::AutomaticOffscreenType
 #ifdef WIN32
-                if (   WGLEW_ARB_pbuffer
-                    && WGLEW_ARB_pixel_format
+                && WGLEW_ARB_pbuffer
+                && WGLEW_ARB_pixel_format
 #else
-                if (   GLXEW_SGIX_pbuffer
-                    && GLXEW_SGIX_fbconfig
+                && GLXEW_SGIX_pbuffer
+                && GLXEW_SGIX_fbconfig
 #endif
-                ) {
-                    newOffscreenType = OpenCSG::PBuffer;
-                }
-                else {
-                    // This should gracefully exit without doing anything
-                    newOffscreenType = OpenCSG::FrameBufferObject;
-                }
-            }
-            if (newOffscreenType == FrameBufferObject) {
-                gOffscreenBuffer = OpenGL::getOffscreenBuffer(true);
-            } else {
-                gOffscreenBuffer = OpenGL::getOffscreenBuffer(false);
-            }
-            if (   gOffscreenBuffer->GetWidth() != sizeX.getMax()
-                || gOffscreenBuffer->GetHeight() != sizeY.getMax()
             ) {
-                // in particular, this detects newly created offscreen buffers,
-                // of which the width / height is -1
-                rebuild = true;
+                newOffscreenType = OpenCSG::PBuffer;
             }
+            else 
+            if (   GLEW_EXT_framebuffer_object
+                && GLEW_EXT_packed_depth_stencil
+            ) {
+                newOffscreenType = OpenCSG::FrameBufferObjectEXT;
+            }
+            else {
+                // At least one set of the above OpenGL extensions is required
+                return false;
+            }
+        }
+
+        gOffscreenBuffer = OpenGL::getOffscreenBuffer(newOffscreenType);
+
+        if (!gOffscreenBuffer) {
+            // Creating the offscreen buffer failed, maybe the OpenGL extension
+            // for the specific offscreen buffer type is not supported
+            return false;
+        }
+
+        if (!gOffscreenBuffer->IsInitialized()) {
+            if (!gOffscreenBuffer->Initialize(sizeX.getMax(), sizeY.getMax(), true, false)) {
+                // Initializing the offscreen buffer failed, maybe the OpenGL extension
+                // for the specific offscreen buffer type is not supported
+                return false;
+            }
+            rebuild = true;
+        }
         // tx == ty == 0 happens if the window is minimized, in this case don't touch a thing
-        } else if (tx != 0 && ty != 0) {
+        else if (tx != 0 && ty != 0) {
             if (   gOffscreenBuffer->GetWidth() != sizeX.getMax()
                 || gOffscreenBuffer->GetHeight() != sizeY.getMax()
             ) {
-                gOffscreenBuffer->Resize(sizeX.getMax(), sizeY.getMax());
+                if (!gOffscreenBuffer->Resize(sizeX.getMax(), sizeY.getMax())) {
+                    // Resizing the offscreen buffer failed, maybe the OpenGL extension
+                    // for the specific offscreen buffer type is not supported. More 
+                    // likely this is a programming error in Resize(). 
+                    return false;
+                }
                 rebuild = true;
             }
         }
 
         if (rebuild) {
-            if (!gOffscreenBuffer->Initialize(sizeX.getMax(), sizeY.getMax(), true, false)) {
-                assert(0);
-            }
-
-            // assert(pbuffer_->HasStencil());
-
+            // assert(gOffscreenBuffer->HasStencil());
             gOffscreenBuffer->BeginCapture();
             defaults();
             glGetIntegerv(GL_STENCIL_BITS, &OpenGL::stencilBits);
@@ -225,6 +236,8 @@ namespace OpenCSG {
         mInOffscreenBuffer = false;
         mCurrentChannel = NoChannel;
         mOccupiedChannels = NoChannel;
+
+        return true;
     }
 
     ChannelManager::~ChannelManager() {

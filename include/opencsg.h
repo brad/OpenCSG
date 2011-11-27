@@ -175,24 +175,29 @@ namespace OpenCSG {
     /// The OffscreenType sets the type of offscreen buffer which is used for
     /// the internal calculations. 
     ///   - AutomaticOffscreenType: Chooses internally depending on available
-    ///                  OpenGL extensions. If graphics hardware both support
-    ///                  frame buffer objects and PBuffers, frame buffer objects
-    ///                  are chosen.
+    ///                  OpenGL extensions. If graphics hardware supports different
+    ///                  extensions, with most precedence ARB frame buffer objects
+    ///                  are used, the PBuffers, then EXT frame buffer objects. 
     ///   - FrameBufferObject: Uses frame buffer objects. This method does 
     ///                  not require context switches on the graphics hardware
     ///                  to change between offscreen and main frame buffer, so
     ///                  in theory this method should be faster. Both ARB and
     ///                  EXT frame buffer objects OpenGL extensions are supported
-    ///                  internally.
+    ///                  internally; ARB frame buffer objects are used if both 
+    ///                  are supported by the graphics hardware. 
     ///   - PBuffer: Uses PBuffers. This is the older offscreen type, which
     ///                  is likely to work with older graphics hardware and
     ///                  drivers.
+    ///   - FrameBufferObjectARB: Forces ARB frame buffer objects to be used.
+    ///   - FrameBufferObjectEXT: Forces EXT frame buffer objects to be used.
     ///   - OffscreenTypeUnused: Invalid input. 
     enum OffscreenType {
         AutomaticOffscreenType = 0,
         FrameBufferObject      = 1,
         PBuffer                = 2,
-        OffscreenTypeUnused    = 3
+        FrameBufferObjectARB   = 3,
+        FrameBufferObjectEXT   = 4,
+        OffscreenTypeUnused    = 5
     };
 
     /// The Optimization flags set whether a specific kind of optimization is
@@ -216,6 +221,29 @@ namespace OpenCSG {
         OptimizationOff       = 3,
         OptimizationUnused    = 4
     };
+
+
+    /// Setting the context is required for applications rendering with
+    /// OpenCSG in different OpenGL windows with OpenGL contexts that
+    /// are not shared. This is needed for internal OpenGL resources,
+    /// such as PBuffers or frame buffer objects, which are created in
+    /// in the render() method and recycled when render() is called again.
+    /// The resources are only valid in the OpenGL context they have
+    /// been created (and in contexts shared with this context).
+    /// To manage this, this function allows to set the identifier of
+    /// resources, which is respected during the render() function.
+    /// OpenGL resources are created/reused by the render() function
+    /// per context.
+    /// The value of context has no specific meaning for OpenCSG;
+    /// it is only used as key in a dictionary to access the OpenGL
+    /// resources. The default context is 0.
+    void setContext(int context);
+    /// Returns the current context.
+    int getContext();
+    /// Releases the OpenGL resources allocated by OpenCSG for the current
+    /// context. 
+    void freeResources();
+
 
     /// Alternate render() function provided for compatibility with older
     /// versions of OpenCSG (version 1.1.1 and before). The function performs

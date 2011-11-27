@@ -23,24 +23,6 @@
 #include <cassert>
 #include <iostream>
 
-#define CHECK_FRAMEBUFFER_STATUS()                            \
-{                                                             \
-    GLenum status;                                            \
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);        \
-    switch(status) {                                          \
-      case GL_FRAMEBUFFER_COMPLETE:                           \
-        /*std::cout << "framebuffer complete" << std::endl;*/ \
-        break;                                                \
-      case GL_FRAMEBUFFER_UNSUPPORTED:                        \
-        /*std::cout << "framebuffer unsupported" << std::endl;*/\
-        /* choose different formats */                        \
-        break;                                                \
-      default:                                                \
-        /* programming error; will fail on all hardware */    \
-        assert(0);                                            \
-    }                                                         \
-}
-
 namespace OpenCSG {
 
     namespace OpenGL {
@@ -65,8 +47,8 @@ namespace OpenCSG {
         bool FrameBufferObject::Initialize(int width, int height, bool /* shareObjects */, bool /* copyContext */ ) {
 
             bool haveFBO = GLEW_ARB_framebuffer_object != 0;
-
-            assert(haveFBO);
+            if (!haveFBO)
+                return false;
 
             this->width = width;
             this->height = height;
@@ -87,7 +69,12 @@ namespace OpenCSG {
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthID);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthID);
 
-            CHECK_FRAMEBUFFER_STATUS();
+            GLenum status;
+            status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (status == GL_FRAMEBUFFER_UNSUPPORTED) {
+                Reset();
+                return false;
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -114,14 +101,26 @@ namespace OpenCSG {
                 glDeleteFramebuffers(1, &framebufferID);
                 framebufferID = 0;
             }
+
+            this->width = -1;
+            this->height = -1;
+
+            initialized = false;
+
             return true;
         }
 
-        // ?
-        bool FrameBufferObject::Resize(int /* width */, int /* height */ )
+        // If new requested size differs, regenerate FBO texture objects
+        bool FrameBufferObject::Resize(int width, int height)
         {
+            if (   this->width == width
+                && this->height == height
+            ) {
+                return true;
+            }
+
             Reset();
-            return true;
+            return Initialize(width, height);
         }
 
         // Binds the created frame buffer texture such we can render into it.
