@@ -172,10 +172,25 @@
 				RelativePath="..\src\channelManager.h">
 			</File>
 			<File
+				RelativePath="..\src\frameBufferObject.cpp">
+			</File>
+			<File
+				RelativePath="..\src\frameBufferObject.h">
+			</File>
+			<File
 				RelativePath="..\src\occlusionQuery.cpp">
 			</File>
 			<File
 				RelativePath="..\src\occlusionQuery.h">
+			</File>
+			<File
+				RelativePath="..\src\offscreenBuffer.cpp">
+			</File>
+			<File
+				RelativePath="..\src\offscreenBuffer.h">
+			</File>
+			<File
+				RelativePath="..\src\opencsgConfig.h">
 			</File>
 			<File
 				RelativePath="..\src\opencsgRender.cpp">
@@ -222,6 +237,12 @@
 			</File>
 			<File
 				RelativePath="..\src\openglHelper.h">
+			</File>
+			<File
+				RelativePath="..\src\pBufferTexture.cpp">
+			</File>
+			<File
+				RelativePath="..\src\pBufferTexture.h">
 			</File>
 			<File
 				RelativePath="..\src\primitive.cpp">
@@ -353,6 +374,12 @@
 				RelativePath="..\src\scissorMemo.h">
 			</File>
 			<File
+				RelativePath="..\src\settings.cpp">
+			</File>
+			<File
+				RelativePath="..\src\settings.h">
+			</File>
+			<File
 				RelativePath="..\src\stencilManager.cpp">
 			</File>
 			<File
@@ -364,9 +391,6 @@
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath="..\include\opencsg.h">
-			</File>
-			<File
-				RelativePath="..\include\opencsgConfig.h">
 			</File>
 		</Filter>
 	</Files>

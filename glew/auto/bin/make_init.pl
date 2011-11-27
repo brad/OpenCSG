@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -31,28 +31,25 @@ our $type = shift;
 if (@ARGV)
 {
     @extlist = @ARGV;
-} else {
-    local $/;
-    @extlist = split "\n", (<>);
-}
 
-foreach my $ext (sort @extlist)
-{
-    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = 
-      parse_ext($ext);
+	foreach my $ext (sort @extlist)
+	{
+		my ($extname, $exturl, $types, $tokens, $functions, $exacts) = 
+			parse_ext($ext);
 
-    make_separator($extname);
-    print "#ifdef $extname\n\n";
-    my $extvar = $extname;
-    my $extvardef = $extname;
-    $extvar =~ s/GL(X*)_/GL$1EW_/;
-    if (keys %$functions)
-    {
-	print "static GLboolean _glewInit_$extname (" . $type . 
-	  "EW_CONTEXT_ARG_DEF_INIT)\n{\n  GLboolean r = GL_FALSE;\n";
-	output_decls($functions, \&make_pfn_def_init);
-	print "\n  return r;\n}\n";
-    }
-    #print "\nGLboolean " . prefix_varname($extvar) . " = GL_FALSE;\n\n";
-    print "#endif /* $extname */\n\n";
+		#make_separator($extname);
+		print "#ifdef $extname\n\n";
+		my $extvar = $extname;
+		my $extvardef = $extname;
+		$extvar =~ s/GL(X*)_/GL$1EW_/;
+		if (keys %$functions)
+		{
+			print "static GLboolean _glewInit_$extname (" . $type . 
+				"EW_CONTEXT_ARG_DEF_INIT)\n{\n  GLboolean r = GL_FALSE;\n";
+			output_decls($functions, \&make_pfn_def_init);
+			print "\n  return r;\n}\n\n";
+		}
+		#print "\nGLboolean " . prefix_varname($extvar) . " = GL_FALSE;\n\n";
+		print "#endif /* $extname */\n\n";
+	}
 }

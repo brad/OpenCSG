@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -35,16 +35,13 @@ my %extensions = ();
 if (@ARGV)
 {
     @extlist = @ARGV;
-} else {
-    local $/;
-    @extlist = split "\n", (<>);
-}
 
-foreach my $ext (sort @extlist)
-{
-    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
+	foreach my $ext (sort @extlist)
+	{
+		my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
 
-    print "#ifdef $extname\n";
-    print "  _glewInfo_$extname();\n";
-    print "#endif /* $extname */\n";
+		print "#ifdef $extname\n";
+		print "  _glewInfo_$extname();\n";
+		print "#endif /* $extname */\n";
+	}
 }

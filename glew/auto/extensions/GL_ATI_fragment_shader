@@ -58,3 +58,13 @@ http://oss.sgi.com/projects/ogl-sample/registry/ATI/fragment_shader.txt
 	void glPassTexCoordATI (GLuint dst, GLuint coord, GLenum swizzle)
 	void glSampleMapATI (GLuint dst, GLuint interp, GLenum swizzle)
 	void glSetFragmentShaderConstantATI (GLuint dst, const GLfloat* value)
+	GL_NUM_FRAGMENT_REGISTERS_ATI 0x896E
+	GL_NUM_FRAGMENT_CONSTANTS_ATI 0x896F
+	GL_NUM_PASSES_ATI 0x8970
+	GL_NUM_INSTRUCTIONS_PER_PASS_ATI 0x8971
+	GL_NUM_INSTRUCTIONS_TOTAL_ATI 0x8972
+	GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI 0x8973
+	GL_NUM_LOOPBACK_COMPONENTS_ATI 0x8974
+	GL_COLOR_ALPHA_PAIRING_ATI 0x8975
+    GL_SWIZZLE_STRQ_ATI 0x897A
+    GL_SWIZZLE_STRQ_DQ_ATI 0x897B

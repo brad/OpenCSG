@@ -1,6 +1,6 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2004
-// Hasso-Plattner-Institute at the University of Potsdam, Germany, and Florian Kirsch
+// Copyright (C) 2002-2006, Florian Kirsch,
+// Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -19,11 +19,12 @@
 // opencsgRender.cpp
 //
 
-#include <opencsgConfig.h>
+#include "opencsgConfig.h"
 #include <opencsg.h>
 #include <GL/glew.h>
 #include "opencsgRender.h"
 #include "primitiveHelper.h"
+#include "settings.h"
 
 namespace OpenCSG {
 
@@ -62,6 +63,16 @@ namespace OpenCSG {
             return;
         }
 
+        int algorithmOrig  = getOption(AlgorithmSetting);
+        int depthComplOrig = getOption(DepthComplexitySetting);
+        bool legacyInterface = false;
+        if (algorithm != AlgorithmUnused) {
+            legacyInterface = true;
+        } else {
+            algorithm = (Algorithm)getOption(AlgorithmSetting);
+            depthComplexityAlgorithm = (DepthComplexityAlgorithm)getOption(DepthComplexitySetting);
+        }
+
         if (algorithm == Automatic) {
             algorithm = chooseAlgorithm(primitives);
             depthComplexityAlgorithm = chooseDepthComplexityAlgorithm(primitives);
@@ -72,27 +83,38 @@ namespace OpenCSG {
             depthComplexityAlgorithm = DepthComplexitySampling;
         }
 
-        switch (algorithm) {
-        case Goldfeather:
-            switch (depthComplexityAlgorithm) {
-            case NoDepthComplexitySampling: 
-                renderGoldfeather(primitives);
+        if (   algorithm != Automatic
+            && depthComplexityAlgorithm != DepthComplexityAlgorithmUnused
+        ) {
+            switch (algorithm) {
+            case Goldfeather:
+                switch (depthComplexityAlgorithm) {
+                case NoDepthComplexitySampling: 
+                    renderGoldfeather(primitives);
+                    break;
+                case OcclusionQuery:
+                    renderOcclusionQueryGoldfeather(primitives);
+                    break;
+                case DepthComplexitySampling:
+                    renderDepthComplexitySamplingGoldfeather(primitives);
+                    break;
+                case DepthComplexityAlgorithmUnused:
+                    break; // does not happen               
+                }
                 break;
-            case OcclusionQuery:
-                renderOcclusionQueryGoldfeather(primitives);
+    
+            case SCS:
+                renderSCS(primitives, depthComplexityAlgorithm);
                 break;
-            case DepthComplexitySampling:
-                renderDepthComplexitySamplingGoldfeather(primitives);
+            
+            default:
                 break;
             }
-            break;
+        }
 
-        case SCS:
-            renderSCS(primitives, depthComplexityAlgorithm);
-            break;
-        
-        default:
-            ;
+        if (legacyInterface) {
+            setOption(AlgorithmSetting, algorithmOrig);
+            setOption(DepthComplexitySetting, depthComplOrig);
         }
     }
 

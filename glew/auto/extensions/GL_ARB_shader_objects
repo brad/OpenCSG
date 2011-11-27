@@ -74,4 +74,4 @@ http://oss.sgi.com/projects/ogl-sample/registry/ARB/shader_objects.txt
 	void glUseProgramObjectARB (GLhandleARB programObj)
 	void glValidateProgramARB (GLhandleARB programObj)
 	typedef char GLcharARB
-	typedef int GLhandleARB
+	typedef unsigned int GLhandleARB

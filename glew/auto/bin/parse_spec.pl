@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -36,7 +36,7 @@ my %typemap = (
     # Intel fsck up
     Glenum   => "GLenum",
     float    => "GLfloat",
-    half     => "GLuint",
+    half     => "GLhalf",
     int      => "GLint",
     short    => "GLshort",
     sizei    => "GLsizei",
@@ -292,7 +292,7 @@ foreach my $spec (sort @speclist)
         $prefix =~ s/^(.+?)(_.+)$/$1/;
         foreach my $token (sort { hex ${$tokens}{$a} <=> hex ${$tokens}{$b} } keys %{$tokens})
         {
-            if ($token =~ /^$prefix.*/i)
+            if ($token =~ /^$prefix\_.*/i)
             {
                 print EXT "\t" . $token . " " . ${%{$tokens}}{$token} . "\n";
             }

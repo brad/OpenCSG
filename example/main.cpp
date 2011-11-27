@@ -1,6 +1,6 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2004
-// Hasso-Plattner-Institute at the University of Potsdam, Germany, and Florian Kirsch
+// Copyright (C) 2002-2006, Florian Kirsch,
+// Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -32,7 +32,9 @@
 enum { 
     CSG_BASIC, CSG_WIDGET, CSG_GRID2D, CSG_GRID3D, CSG_CONCAVE,
 
-    ALGO_AUTOMATIC, GF_STANDARD, GF_DC, GF_OQ, SCS_STANDARD, SCS_DC, SCS_OQ 
+    ALGO_AUTOMATIC, GF_STANDARD, GF_DC, GF_OQ, SCS_STANDARD, SCS_DC, SCS_OQ,
+
+    OFFSCREEN_AUTOMATIC, OFFSCREEN_FBO, OFFSCREEN_PBUFFER
 };
 
 std::vector<OpenCSG::Primitive*> primitives;
@@ -347,6 +349,11 @@ void menu(int value) {
     case SCS_STANDARD:  algo = OpenCSG::SCS;            depthalgo = OpenCSG::NoDepthComplexitySampling; break;
     case SCS_DC:        algo = OpenCSG::SCS;            depthalgo = OpenCSG::DepthComplexitySampling;   break;
     case SCS_OQ:        algo = OpenCSG::SCS;            depthalgo = OpenCSG::OcclusionQuery;            break;
+
+    case OFFSCREEN_AUTOMATIC: OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::AutomaticOffscreenType); break;
+    case OFFSCREEN_FBO:       OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::FrameBufferObject);      break;
+    case OFFSCREEN_PBUFFER:   OpenCSG::setOption(OpenCSG::OffscreenSetting, OpenCSG::PBuffer);                break;
+
     default: break;
     }
     display();
@@ -409,19 +416,27 @@ int main(int argc, char **argv)
     glutAddMenuEntry("Goldfeather standard",GF_STANDARD);
     glutAddMenuEntry("Goldfeather depth complexity sampling", GF_DC);
     glutAddMenuEntry("Goldfeather occlusion query", GF_OQ);
-    glutAddMenuEntry("SCS standard",SCS_STANDARD);
+    glutAddMenuEntry("SCS standard", SCS_STANDARD);
     glutAddMenuEntry("SCS depth complexity sampling", SCS_DC);
     glutAddMenuEntry("SCS occlusion query", SCS_OQ);
+
+    int menuSettings = glutCreateMenu(menu);
+    glutAddMenuEntry("Automatic", OFFSCREEN_AUTOMATIC);
+    glutAddMenuEntry("Frame buffer object", OFFSCREEN_FBO);
+    glutAddMenuEntry("PBuffer", OFFSCREEN_PBUFFER);
 
     glutCreateMenu(menu);
     glutAddSubMenu("CSG Shapes", menuShape);
     glutAddSubMenu("CSG Algorithms", menuAlgorithm);
+    glutAddSubMenu("Settings", menuSettings);
 
     // connect to right mouse button
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     glutDisplayFunc(display);
     glutKeyboardFunc(key);
+
+    menu(OFFSCREEN_AUTOMATIC);
 
     glutIdleFunc(idle);
     init();

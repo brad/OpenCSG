@@ -3,7 +3,7 @@
 **
 ** Copyright (C) Nate Robins, 1997
 **               Michael Wimmer, 1999
-**               Milan Ikits, 2004, 2003
+**               Milan Ikits, 2003-2006
 **
 ** visualinfo is a small utility that displays all available visuals,
 ** aka. pixelformats, in an OpenGL system along with renderer version
@@ -42,13 +42,13 @@
 #endif
 
 #ifdef GLEW_MX
-extern GLEWContext _glewctx;
+GLEWContext _glewctx;
 #  define glewGetContext() (&_glewctx)
 #  ifdef _WIN32
-extern WGLEWContext _wglewctx;
+WGLEWContext _wglewctx;
 #    define wglewGetContext() (&_wglewctx)
 #  elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
-extern GLXEWContext _glxewctx;
+GLXEWContext _glxewctx;
 #    define glxewGetContext() (&_glxewctx)
 #  endif
 #endif /* GLEW_MX */

@@ -4,12 +4,12 @@ Name=OpenCSG
 Ver=1
 IsCpp=1
 Type=0
-Compiler=-D__GNUWIN32__ -W -DWIN32 -DNDEBUG -D_WINDOWS -DGLEW_STATIC_@@_
-CppCompiler=-D__GNUWIN32__ -W -DWIN32 -DNDEBUG -D_WINDOWS -DGLEW_STATIC_@@_
+Compiler=-D__GNUWIN32__ -W -Wall -DWIN32 -DNDEBUG -D_WINDOWS -DGLEW_STATIC_@@_
+CppCompiler=-D__GNUWIN32__ -W -Wall -DWIN32 -DNDEBUG -D_WINDOWS -DGLEW_STATIC_@@_
 Includes=include;glew/include;.
 Linker=-lopengl32_@@_-lglu32_@@_-lglut32_@@_
 Libs=
-UnitCount=31
+UnitCount=39
 Folders="Header Files","Source Files","Source Files/glew","Source Files/OpenCSG","Source Files/OpenCSGexample","Source Files/RenderTexture"
 ObjFiles=
 PrivateResource=
@@ -25,7 +25,9 @@ CommandLine=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=000000000000000000
+CompilerSettings=0000000000000000000000
+UseCustomMakefile=0
+CustomMakefile=
 
 [Unit1]
 FileName=src\area.cpp
@@ -268,8 +270,8 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit25]
-FileName=include\opencsgConfig.h
-Folder=Header Files
+FileName=example\main.cpp
+Folder=Source Files/OpenCSGexample
 Compile=1
 CompileCpp=1
 Link=1
@@ -278,16 +280,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit26]
-FileName=example\main.cpp
-CompileCpp=1
-Folder=Source Files/OpenCSGexample
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit27]
 FileName=example\displaylistPrimitive.h
 CompileCpp=1
 Folder=Source Files/OpenCSGexample
@@ -297,7 +289,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit28]
+[Unit27]
 FileName=example\displaylistPrimitive.cpp
 CompileCpp=1
 Folder=Source Files/OpenCSGexample
@@ -307,7 +299,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit29]
+[Unit28]
 FileName=glew\src\glew.c
 CompileCpp=1
 Folder=Source Files/glew
@@ -317,7 +309,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit30]
+[Unit29]
 FileName=glew\include\GL\wglew.h
 CompileCpp=1
 Folder=Source Files/glew
@@ -327,10 +319,20 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit31]
+[Unit30]
 FileName=glew\include\GL\glew.h
 CompileCpp=1
 Folder=Source Files/glew
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit31]
+FileName=src\opencsgConfig.h
+CompileCpp=1
+Folder=Source Files/OpenCSG
 Compile=1
 Link=1
 Priority=1000
@@ -355,4 +357,83 @@ ProductName=OpenCSG
 ProductVersion=0.1
 AutoIncBuildNr=0
 
+[Unit32]
+FileName=src\settings.h
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit33]
+FileName=src\frameBufferObject.cpp
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit34]
+FileName=src\frameBufferObject.h
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit35]
+FileName=src\offscreenBuffer.cpp
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit36]
+FileName=src\offscreenBuffer.h
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit37]
+FileName=src\pBufferTexture.cpp
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit38]
+FileName=src\pBufferTexture.h
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit39]
+FileName=src\settings.cpp
+CompileCpp=1
+Folder=Source Files/OpenCSG
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
 

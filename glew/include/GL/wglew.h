@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
-** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002-2006, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2006, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -29,35 +29,6 @@
 ** THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
-** License Applicability. Except to the extent portions of this file are
-** made subject to an alternative license as permitted in the SGI Free
-** Software License B, Version 1.1 (the "License"), the contents of this
-** file are subject only to the provisions of the License. You may not use
-** this file except in compliance with the License. You may obtain a copy
-** of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
-** Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
-** 
-** http://oss.sgi.com/projects/FreeB
-** 
-** Note that, as provided in the License, the Software is distributed on an
-** "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
-** DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
-** CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
-** PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-** 
-** Original Code. The Original Code is: OpenGL Sample Implementation,
-** Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
-** Inc. The Original Code is Copyright (c) 1991-2000 Silicon Graphics, Inc.
-** Copyright in any portions created by third parties is as indicated
-** elsewhere herein. All Rights Reserved.
-** 
-** Additional Notice Provisions: This software was created using the
-** OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
-** not been independently verified as being compliant with the OpenGL(R)
-** version 1.2.1 Specification.
-*/
-
 #ifndef __wglew_h__
 #define __wglew_h__
 #define __WGLEW_H__
@@ -69,7 +40,9 @@
 #define __wglext_h_
 
 #if !defined(APIENTRY) && !defined(__CYGWIN__)
-#define WIN32_LEAN_AND_MEAN 1
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN 1
+#  endif
 #include <windows.h>
 #endif
 
@@ -102,6 +75,24 @@ extern "C" {
 #define WGLEW_3DFX_multisample WGLEW_GET_VAR(__WGLEW_3DFX_multisample)
 
 #endif /* WGL_3DFX_multisample */
+
+/* ------------------------- WGL_3DL_stereo_control ------------------------ */
+
+#ifndef WGL_3DL_stereo_control
+#define WGL_3DL_stereo_control 1
+
+#define WGL_STEREO_EMITTER_ENABLE_3DL 0x2055
+#define WGL_STEREO_EMITTER_DISABLE_3DL 0x2056
+#define WGL_STEREO_POLARITY_NORMAL_3DL 0x2057
+#define WGL_STEREO_POLARITY_INVERT_3DL 0x2058
+
+typedef BOOL (WINAPI * PFNWGLSETSTEREOEMITTERSTATE3DLPROC) (HDC hDC, UINT uState);
+
+#define wglSetStereoEmitterState3DL WGLEW_GET_FUN(__wglewSetStereoEmitterState3DL)
+
+#define WGLEW_3DL_stereo_control WGLEW_GET_VAR(__WGLEW_3DL_stereo_control)
+
+#endif /* WGL_3DL_stereo_control */
 
 /* ------------------------- WGL_ARB_buffer_region ------------------------- */
 
@@ -266,6 +257,17 @@ typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixel
 
 #endif /* WGL_ARB_pixel_format */
 
+/* ----------------------- WGL_ARB_pixel_format_float ---------------------- */
+
+#ifndef WGL_ARB_pixel_format_float
+#define WGL_ARB_pixel_format_float 1
+
+#define WGL_TYPE_RGBA_FLOAT_ARB 0x21A0
+
+#define WGLEW_ARB_pixel_format_float WGLEW_GET_VAR(__WGLEW_ARB_pixel_format_float)
+
+#endif /* WGL_ARB_pixel_format_float */
+
 /* ------------------------- WGL_ARB_render_texture ------------------------ */
 
 #ifndef WGL_ARB_render_texture
@@ -330,6 +332,17 @@ typedef BOOL (WINAPI * PFNWGLSETPBUFFERATTRIBARBPROC) (HPBUFFERARB hPbuffer, con
 
 #endif /* WGL_ATI_pixel_format_float */
 
+/* -------------------- WGL_ATI_render_texture_rectangle ------------------- */
+
+#ifndef WGL_ATI_render_texture_rectangle
+#define WGL_ATI_render_texture_rectangle 1
+
+#define WGL_TEXTURE_RECTANGLE_ATI 0x21A5
+
+#define WGLEW_ATI_render_texture_rectangle WGLEW_GET_VAR(__WGLEW_ATI_render_texture_rectangle)
+
+#endif /* WGL_ATI_render_texture_rectangle */
+
 /* -------------------------- WGL_EXT_depth_float -------------------------- */
 
 #ifndef WGL_EXT_depth_float
@@ -372,6 +385,17 @@ typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGEXTPROC) (void);
 #define WGLEW_EXT_extensions_string WGLEW_GET_VAR(__WGLEW_EXT_extensions_string)
 
 #endif /* WGL_EXT_extensions_string */
+
+/* ------------------------ WGL_EXT_framebuffer_sRGB ----------------------- */
+
+#ifndef WGL_EXT_framebuffer_sRGB
+#define WGL_EXT_framebuffer_sRGB 1
+
+#define WGL_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x20A9
+
+#define WGLEW_EXT_framebuffer_sRGB WGLEW_GET_VAR(__WGLEW_EXT_framebuffer_sRGB)
+
+#endif /* WGL_EXT_framebuffer_sRGB */
 
 /* ----------------------- WGL_EXT_make_current_read ----------------------- */
 
@@ -495,6 +519,17 @@ typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVEXTPROC) (HDC hdc, int iPixel
 #define WGLEW_EXT_pixel_format WGLEW_GET_VAR(__WGLEW_EXT_pixel_format)
 
 #endif /* WGL_EXT_pixel_format */
+
+/* ------------------- WGL_EXT_pixel_format_packed_float ------------------- */
+
+#ifndef WGL_EXT_pixel_format_packed_float
+#define WGL_EXT_pixel_format_packed_float 1
+
+#define WGL_TYPE_RGBA_UNSIGNED_FLOAT_EXT 0x20A8
+
+#define WGLEW_EXT_pixel_format_packed_float WGLEW_GET_VAR(__WGLEW_EXT_pixel_format_packed_float)
+
+#endif /* WGL_EXT_pixel_format_packed_float */
 
 /* -------------------------- WGL_EXT_swap_control ------------------------- */
 
@@ -757,6 +792,8 @@ struct WGLEWContextStruct
 {
 #endif /* GLEW_MX */
 
+WGLEW_EXPORT PFNWGLSETSTEREOEMITTERSTATE3DLPROC __wglewSetStereoEmitterState3DL;
+
 WGLEW_EXPORT PFNWGLCREATEBUFFERREGIONARBPROC __wglewCreateBufferRegionARB;
 WGLEW_EXPORT PFNWGLDELETEBUFFERREGIONARBPROC __wglewDeleteBufferRegionARB;
 WGLEW_EXPORT PFNWGLRESTOREBUFFERREGIONARBPROC __wglewRestoreBufferRegionARB;
@@ -850,21 +887,26 @@ WGLEW_EXPORT PFNWGLSWAPLAYERBUFFERSMSCOMLPROC __wglewSwapLayerBuffersMscOML;
 WGLEW_EXPORT PFNWGLWAITFORMSCOMLPROC __wglewWaitForMscOML;
 WGLEW_EXPORT PFNWGLWAITFORSBCOMLPROC __wglewWaitForSbcOML;
 WGLEW_EXPORT GLboolean __WGLEW_3DFX_multisample;
+WGLEW_EXPORT GLboolean __WGLEW_3DL_stereo_control;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_buffer_region;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_extensions_string;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_make_current_read;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_multisample;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_pbuffer;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_pixel_format;
+WGLEW_EXPORT GLboolean __WGLEW_ARB_pixel_format_float;
 WGLEW_EXPORT GLboolean __WGLEW_ARB_render_texture;
 WGLEW_EXPORT GLboolean __WGLEW_ATI_pixel_format_float;
+WGLEW_EXPORT GLboolean __WGLEW_ATI_render_texture_rectangle;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_depth_float;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_display_color_table;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_extensions_string;
+WGLEW_EXPORT GLboolean __WGLEW_EXT_framebuffer_sRGB;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_make_current_read;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_multisample;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_pbuffer;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_pixel_format;
+WGLEW_EXPORT GLboolean __WGLEW_EXT_pixel_format_packed_float;
 WGLEW_EXPORT GLboolean __WGLEW_EXT_swap_control;
 WGLEW_EXPORT GLboolean __WGLEW_I3D_digital_video_control;
 WGLEW_EXPORT GLboolean __WGLEW_I3D_gamma;
@@ -888,6 +930,10 @@ WGLEW_EXPORT GLboolean __WGLEW_OML_sync_control;
 
 typedef struct WGLEWContextStruct WGLEWContext;
 GLEWAPI GLenum wglewContextInit (WGLEWContext* ctx);
+GLEWAPI GLboolean wglewContextIsSupported (WGLEWContext* ctx, const char* name);
+
+#define wglewInit() wglewContextInit(wglewGetContext())
+#define wglewIsSupported(x) wglewContextIsSupported(wglewGetContext(), x)
 
 #define WGLEW_GET_VAR(x) wglewGetContext()->x
 #define WGLEW_GET_FUN(x) wglewGetContext()->x
@@ -896,6 +942,8 @@ GLEWAPI GLenum wglewContextInit (WGLEWContext* ctx);
 
 #define WGLEW_GET_VAR(x) x
 #define WGLEW_GET_FUN(x) x
+
+GLEWAPI GLboolean wglewIsSupported (const char* name);
 
 #endif /* GLEW_MX */
 

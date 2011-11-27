@@ -36,7 +36,7 @@ http://www.opengl.org/documentation/specs/version1.5/glspec15.pdf
 	GL_DYNAMIC_READ 0x88E9
 	GL_DYNAMIC_COPY 0x88EA
 	GL_SAMPLES_PASSED 0x8914
-	GL_FOG_COORD_SOURCE GL_FOG_COORDINATE_SOURCE
+	GL_FOG_COORD_SRC GL_FOG_COORDINATE_SOURCE
 	GL_FOG_COORD GL_FOG_COORDINATE
 	GL_CURRENT_FOG_COORD GL_CURRENT_FOG_COORDINATE
 	GL_FOG_COORD_ARRAY_TYPE GL_FOG_COORDINATE_ARRAY_TYPE
@@ -55,7 +55,7 @@ http://www.opengl.org/documentation/specs/version1.5/glspec15.pdf
 	GLboolean glIsQuery (GLuint id)
 	void glBeginQuery (GLenum target, GLuint id)
 	void glEndQuery (GLenum target)
-	void glGetQueryiv (GLenum target, GLenum pname, GLint params)
+	void glGetQueryiv (GLenum target, GLenum pname, GLint* params)
 	void glGetQueryObjectiv (GLuint id, GLenum pname, GLint* params)
 	void glGetQueryObjectuiv (GLuint id, GLenum pname, GLuint* params)
 	void glBindBuffer (GLenum target, GLuint buffer)

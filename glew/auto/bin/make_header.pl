@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -49,26 +49,23 @@ our $type = shift;
 if (@ARGV)
 {
     @extlist = @ARGV;
-} else {
-    local $/;
-    @extlist = split "\n", (<>);
-}
 
-foreach my $ext (sort @extlist)
-{
-    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
+	foreach my $ext (sort @extlist)
+	{
+		my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
 
-    make_separator($extname);
-    print "#ifndef $extname\n#define $extname 1\n";
-    output_tokens($tokens, \&make_define);
-    output_types($types, \&make_type);
-    output_exacts($exacts, \&make_exact);
-    output_decls($functions, \&make_pfn_type);
-    output_decls($functions, \&make_pfn_alias);
+		make_separator($extname);
+		print "#ifndef $extname\n#define $extname 1\n";
+		output_tokens($tokens, \&make_define);
+		output_types($types, \&make_type);
+		output_exacts($exacts, \&make_exact);
+		output_decls($functions, \&make_pfn_type);
+		output_decls($functions, \&make_pfn_alias);
 
-    my $extvar = $extname;
-    $extvar =~ s/GL(X*)_/GL$1EW_/;
-
-    print "\n#define $extvar " . $type . "EW_GET_VAR(" . prefix_varname($extvar) . ")\n";
-    print "\n#endif /* $extname */\n\n";
+		my $extvar = $extname;
+		$extvar =~ s/GL(X*)_/GL$1EW_/;
+		
+		print "\n#define $extvar " . $type . "EW_GET_VAR(" . prefix_varname($extvar) . ")\n";
+		print "\n#endif /* $extname */\n\n";
+	}
 }

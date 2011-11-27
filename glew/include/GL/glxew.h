@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
-** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002-2006, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2006, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -57,6 +57,7 @@
 #endif
 
 #define __glxext_h_
+#define __GLX_glx_h__
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -99,7 +100,11 @@ extern "C" {
 
 typedef XID GLXDrawable;
 typedef XID GLXPixmap;
+#ifdef __sun
+typedef struct __glXcontextRec *GLXContext;
+#else
 typedef struct __GLXcontextRec *GLXContext;
+#endif
 
 extern Bool glXQueryExtension (Display *dpy, int *errorBase, int *eventBase);
 extern Bool glXQueryVersion (Display *dpy, int *major, int *minor);
@@ -288,6 +293,18 @@ extern void ( * glXGetProcAddress (const GLubyte *procName)) (void);
 
 #endif /* GLX_3DFX_multisample */
 
+/* ------------------------- GLX_ARB_fbconfig_float ------------------------ */
+
+#ifndef GLX_ARB_fbconfig_float
+#define GLX_ARB_fbconfig_float 1
+
+#define GLX_RGBA_FLOAT_BIT 0x00000004
+#define GLX_RGBA_FLOAT_TYPE 0x20B9
+
+#define GLXEW_ARB_fbconfig_float GLXEW_GET_VAR(__GLXEW_ARB_fbconfig_float)
+
+#endif /* GLX_ARB_fbconfig_float */
+
 /* ------------------------ GLX_ARB_get_proc_address ----------------------- */
 
 #ifndef GLX_ARB_get_proc_address
@@ -374,6 +391,29 @@ typedef void ( * PFNGLXRELEASETEXIMAGEATIPROC) (Display *dpy, GLXPbuffer pbuf, i
 #define GLXEW_ATI_render_texture GLXEW_GET_VAR(__GLXEW_ATI_render_texture)
 
 #endif /* GLX_ATI_render_texture */
+
+/* --------------------- GLX_EXT_fbconfig_packed_float --------------------- */
+
+#ifndef GLX_EXT_fbconfig_packed_float
+#define GLX_EXT_fbconfig_packed_float 1
+
+#define GLX_RGBA_UNSIGNED_FLOAT_BIT_EXT 0x00000008
+#define GLX_RGBA_UNSIGNED_FLOAT_TYPE_EXT 0x20B1
+
+#define GLXEW_EXT_fbconfig_packed_float GLXEW_GET_VAR(__GLXEW_EXT_fbconfig_packed_float)
+
+#endif /* GLX_EXT_fbconfig_packed_float */
+
+/* ------------------------ GLX_EXT_framebuffer_sRGB ----------------------- */
+
+#ifndef GLX_EXT_framebuffer_sRGB
+#define GLX_EXT_framebuffer_sRGB 1
+
+#define GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x20B2
+
+#define GLXEW_EXT_framebuffer_sRGB GLXEW_GET_VAR(__GLXEW_EXT_framebuffer_sRGB)
+
+#endif /* GLX_EXT_framebuffer_sRGB */
 
 /* ------------------------- GLX_EXT_import_context ------------------------ */
 
@@ -978,10 +1018,13 @@ GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_2;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_3;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_4;
 GLXEW_EXPORT GLboolean __GLXEW_3DFX_multisample;
+GLXEW_EXPORT GLboolean __GLXEW_ARB_fbconfig_float;
 GLXEW_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
 GLXEW_EXPORT GLboolean __GLXEW_ARB_multisample;
 GLXEW_EXPORT GLboolean __GLXEW_ATI_pixel_format_float;
 GLXEW_EXPORT GLboolean __GLXEW_ATI_render_texture;
+GLXEW_EXPORT GLboolean __GLXEW_EXT_fbconfig_packed_float;
+GLXEW_EXPORT GLboolean __GLXEW_EXT_framebuffer_sRGB;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_import_context;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_scene_marker;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_visual_info;
@@ -1022,6 +1065,10 @@ GLXEW_EXPORT GLboolean __GLXEW_SUN_video_resize;
 
 typedef struct GLXEWContextStruct GLXEWContext;
 extern GLenum glxewContextInit (GLXEWContext* ctx);
+extern GLboolean glxewContextIsSupported (GLXEWContext* ctx, const char* name);
+
+#define glxewInit() glxewContextInit(glxewGetContext())
+#define glxewIsSupported(x) glxewContextIsSupported(glxewGetContext(), x)
 
 #define GLXEW_GET_VAR(x) glxewGetContext()->x
 #define GLXEW_GET_FUN(x) x
@@ -1030,6 +1077,8 @@ extern GLenum glxewContextInit (GLXEWContext* ctx);
 
 #define GLXEW_GET_VAR(x) x
 #define GLXEW_GET_FUN(x) x
+
+extern GLboolean glxewIsSupported (const char* name);
 
 #endif /* GLEW_MX */
 

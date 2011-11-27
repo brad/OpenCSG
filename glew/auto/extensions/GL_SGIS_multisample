@@ -16,8 +16,6 @@ http://oss.sgi.com/projects/ogl-sample/registry/SGIS/multisample.txt
 	GL_SAMPLE_MASK_VALUE_SGIS 0x80AA
 	GL_SAMPLE_MASK_INVERT_SGIS 0x80AB
 	GL_SAMPLE_PATTERN_SGIS 0x80AC
-	GLX_SAMPLE_BUFFERS_SGIS 100000
-	GLX_SAMPLES_SGIS 100001
 	GL_MULTISAMPLE_BIT_EXT 0x20000000
 	void glSampleMaskSGIS (GLclampf value, GLboolean invert)
 	void glSamplePatternSGIS (GLenum pattern)

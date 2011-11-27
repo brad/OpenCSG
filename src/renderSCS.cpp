@@ -1,6 +1,6 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2004
-// Hasso-Plattner-Institute at the University of Potsdam, Germany, and Florian Kirsch
+// Copyright (C) 2002-2006, Florian Kirsch,
+// Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -21,7 +21,7 @@
 // stuff specific for the SCS algorithm
 //
 
-#include <opencsgConfig.h>
+#include "opencsgConfig.h"
 #include <opencsg.h>
 #include "opencsgRender.h"
 #include "batch.h"
@@ -82,6 +82,10 @@ namespace OpenCSG {
             }
 
             scissor->disable();
+
+            glDisable(GL_ALPHA_TEST);
+            glDisable(GL_CULL_FACE);
+            glDepthFunc(GL_LEQUAL);
 
             resetProjectiveTexture();
 
@@ -357,8 +361,8 @@ namespace OpenCSG {
         channelMgr = new SCSChannelManager;
         scissor = new ScissorMemo;
 
-        std::vector<Primitive*> intersected;
-        std::vector<Primitive*> subtracted;
+        std::vector<Primitive*> intersected; intersected.reserve(primitives.size());
+        std::vector<Primitive*> subtracted;  subtracted.reserve(primitives.size());
 
         {
             for (std::vector<Primitive*>::const_iterator itr = primitives.begin(); itr != primitives.end(); ++itr) {
@@ -386,7 +390,7 @@ namespace OpenCSG {
             scissor->enable();
             glClear(GL_STENCIL_BUFFER_BIT);
             depthComplexity = 
-                std::min(OpenGL::calcMaxDepthComplexity(subtracted, scissor->getCurrentArea()), 
+                (std::min)(OpenGL::calcMaxDepthComplexity(subtracted, scissor->getCurrentArea()), 
                          subtractedBatches.size());
         }
 
@@ -413,7 +417,9 @@ namespace OpenCSG {
             break;
         case DepthComplexitySampling:
             subtractPrimitives(subtractedBatches.begin(), subtractedBatches.end(), depthComplexity);
-            break;      
+            break;
+        case DepthComplexityAlgorithmUnused:
+            break; // does not happen when invoked correctly           
         }
         renderIntersectedBack(intersected);
 

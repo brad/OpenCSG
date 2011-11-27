@@ -1,31 +1,31 @@
 # Microsoft Developer Studio Project File - Name="OpenCSG" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** DO NOT EDIT **
+# ** NICHT BEARBEITEN ** 
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
 CFG=OpenCSG - Win32 Debug
-!MESSAGE This is not a valid makefile. To build this project using NMAKE,
-!MESSAGE use the Export Makefile command and run
+!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
+!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
 !MESSAGE 
 !MESSAGE NMAKE /f "OpenCSG.mak".
 !MESSAGE 
-!MESSAGE You can specify a configuration when running NMAKE
-!MESSAGE by defining the macro CFG on the command line. For example:
+!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
+!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
 !MESSAGE 
 !MESSAGE NMAKE /f "OpenCSG.mak" CFG="OpenCSG - Win32 Debug"
 !MESSAGE 
-!MESSAGE Possible choices for configuration are:
+!MESSAGE Für die Konfiguration stehen zur Auswahl:
 !MESSAGE 
-!MESSAGE "OpenCSG - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "OpenCSG - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "OpenCSG - Win32 Release" (basierend auf  "Win32 (x86) Static Library")
+!MESSAGE "OpenCSG - Win32 Debug" (basierend auf  "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=xicl6.exe
+CPP=cl.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "OpenCSG - Win32 Release"
@@ -111,11 +111,31 @@ SOURCE=..\src\channelManager.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\frameBufferObject.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\frameBufferObject.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\occlusionQuery.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\occlusionQuery.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\offscreenBuffer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\offscreenBuffer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\opencsgConfig.h
 # End Source File
 # Begin Source File
 
@@ -132,6 +152,14 @@ SOURCE=..\src\openglHelper.cpp
 # Begin Source File
 
 SOURCE=..\src\openglHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\pBufferTexture.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\pBufferTexture.h
 # End Source File
 # Begin Source File
 
@@ -171,6 +199,14 @@ SOURCE=..\src\scissorMemo.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\settings.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\settings.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\stencilManager.cpp
 # End Source File
 # Begin Source File
@@ -184,10 +220,6 @@ SOURCE=..\src\stencilManager.h
 # Begin Source File
 
 SOURCE=..\include\opencsg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\opencsgConfig.h
 # End Source File
 # End Group
 # End Target

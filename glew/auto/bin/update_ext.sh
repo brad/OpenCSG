@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -45,6 +45,20 @@ if [ ! -d $1 ] ; then
 # fix GLvoid in GL_ARB_vertex_buffer_objects
     perl -e 's/ void\*/ GLvoid\*/g' -pi \
         $1/GL_ARB_vertex_buffer_object
+
+# add deprecated constants to GL_ATI_fragment_shader
+    cat >> $1/GL_ATI_fragment_shader <<EOT
+	GL_NUM_FRAGMENT_REGISTERS_ATI 0x896E
+	GL_NUM_FRAGMENT_CONSTANTS_ATI 0x896F
+	GL_NUM_PASSES_ATI 0x8970
+	GL_NUM_INSTRUCTIONS_PER_PASS_ATI 0x8971
+	GL_NUM_INSTRUCTIONS_TOTAL_ATI 0x8972
+	GL_NUM_INPUT_INTERPOLATOR_COMPONENTS_ATI 0x8973
+	GL_NUM_LOOPBACK_COMPONENTS_ATI 0x8974
+	GL_COLOR_ALPHA_PAIRING_ATI 0x8975
+    GL_SWIZZLE_STRQ_ATI 0x897A
+    GL_SWIZZLE_STRQ_DQ_ATI 0x897B
+EOT
 
 # fix WGL_ATI_pixel_format_float
     cat >> $1/WGL_ATI_pixel_format_float <<EOT
@@ -145,7 +159,15 @@ EOT
 # add typedefs to GL_ARB_shader_objects
     cat >> $1/GL_ARB_shader_objects <<EOT
 	typedef char GLcharARB
-	typedef int GLhandleARB
+	typedef unsigned int GLhandleARB
+EOT
+
+# add missing functions to GL_ARB_transpose_matrix
+	cat >> $1/GL_ARB_transpose_matrix <<EOT
+	void glLoadTransposeMatrixfARB (GLfloat m[16])
+	void glLoadTransposeMatrixdARB (GLdouble m[16])
+	void glMultTransposeMatrixfARB (GLfloat m[16])
+	void glMultTransposeMatrixdARB (GLdouble m[16])
 EOT
 
 # fix const correctness in GL_ARB_shader_objects

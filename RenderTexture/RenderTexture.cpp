@@ -61,8 +61,8 @@ using namespace std;
 * @brief Mode-string-based Constructor.
 */ 
 RenderTexture::RenderTexture(const char *strMode)
-:   _iWidth(0), 
-    _iHeight(0), 
+:   _iWidth(-1), 
+    _iHeight(-1), 
     _bIsTexture(false),
     _bIsDepthTexture(false),
     _bHasARBDepthTexture(true),            // [Redge]
@@ -1023,7 +1023,6 @@ void RenderTexture::_ParseModeString(const char *modeString,
     bool bBindCUBE = false;
     
     char *mode = strdup(modeString);
-    
 
     vector<string> tokens;
     char *buf = strtok(mode, " ");
@@ -1032,6 +1031,13 @@ void RenderTexture::_ParseModeString(const char *modeString,
         tokens.push_back(buf);
         buf = strtok(NULL, " ");
     }
+
+#ifndef _MSC_VER
+    // in debug mode, microsoft visual studio (6.0, 7.1 works apparently)
+    // assert that the heap is corrupt when this free is done. To be safe, 
+    // just don't do it with these compilers (memory leak is negligable here)
+    free(mode);
+#endif
 
     for (unsigned int i = 0; i < tokens.size(); i++)
     {
@@ -1660,7 +1666,7 @@ bool RenderTexture::_VerifyExtensions()
         PrintExtensionError("WGL_ARB_pixel_format");
         return false;
     }
-    if (_bIsTexture && !WGLEW_ARB_render_texture)
+    if (_eUpdateMode == RT_RENDER_TO_TEXTURE && !WGLEW_ARB_render_texture)
     {
         PrintExtensionError("WGL_ARB_render_texture");
         return false;

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##
-## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
-## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+## Copyright (C) 2003-2006, Marcelo E. Magallon <mmagallo[]debian org>
+## Copyright (C) 2003-2006, Milan Ikits <milan ikits[]ieee org>
 ##
 ## This program is distributed under the terms and conditions of the GNU
 ## General Public License Version 2 as published by the Free Software
@@ -22,28 +22,28 @@ my $cur_group = "";
 if (@ARGV)
 {
     @extlist = @ARGV;
-} else {
-    local $/;
-    @extlist = split "\n", (<>);
-}
 
-foreach my $ext (sort @extlist)
-{
-    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
-    $cur_group = $extname;
-    $cur_group =~ s/^(?:W?)GL(?:X?)_([A-Z0-9]+?)_.*$/$1/;
-    $extname =~ s/^(?:W?)GL(?:X?)_(.*)$/$1/;
-    if ($cur_group ne $group)
-    {
-	$group = $cur_group;
-	print "<br>\n";
-    }
-    if ($exturl)
-    {
-	print "<a href=\"$exturl\">$extname</a><br>\n";
-    }
-    else
-    {
-	print "$extname<br>\n";
-    }
+	foreach my $ext (sort @extlist)
+	{
+		my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
+		$cur_group = $extname;
+		$cur_group =~ s/^(?:W?)GL(?:X?)_([A-Z0-9]+?)_.*$/$1/;
+		$extname =~ s/^(?:W?)GL(?:X?)_(.*)$/$1/;
+		if ($cur_group ne $group)
+		{
+			if ($group ne "")
+			{
+				print "<br>\n";
+			}
+			$group = $cur_group;
+		}
+		if ($exturl)
+		{
+			print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"$exturl\">$extname</a><br>\n";
+		}
+		else
+		{
+			print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$extname<br>\n";
+		}
+	}
 }
