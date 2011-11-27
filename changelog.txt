@@ -1,0 +1,35 @@
+
+21.11.2003:
+    Release 0.9.1
+
+21.11.2003:
+    Fixed: std::max() std::min() issue with .net
+
+18.11.2003:
+    Fixed: Bug with heuristic for resizing the pbuffer-resizing
+        that occured for request for sizes of the form 512x1024
+        -> 1024x512 -> 512x1024 -> ... (and similar series)
+
+06.11.2003: 
+    Added: Detection of GL_FRONT_FACE OpenGL setting. This means that
+        CSG rendering is now also correct if this setting is the
+        non-default clockwise setting.
+
+04.11.2003: 
+    Fixed: Stenciling was not disabled in SCS algorithm when 
+        subtracting no shapes. This could lead to obscure rendering 
+        errors when rendering the next CSG shape. 
+
+02.11.2003: 
+    Added: Heuristic that makes the pbuffer smaller 
+        if the size of the pbuffer has been bigger than necessary in 
+        x- or y- direction for a certain number of render-calles. 
+        This permits to use OpenCSG for CSG rendering in different
+        canvases with different sizes without constant expensive
+        resizing of the pbuffer for every frame.
+
+01.10.2003 
+    Fixed: linux: removed accidental linking against tcl/tk  
+
+23.09.2003: 
+    Release 0.9

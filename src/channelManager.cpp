@@ -37,8 +37,10 @@ namespace OpenCSG {
     
     RenderTexture* ChannelManager::pbuffer_ = 0;
     bool ChannelManager::inUse_ = false;
-
+    
     namespace {
+
+        GLint FaceOrientation = GL_CCW;
 
         int nextPow2(int value) {
             if(value <= 0) { return 0; }
@@ -73,6 +75,8 @@ namespace OpenCSG {
         glDisable(GL_LIGHTING);
         glShadeModel(GL_FLAT);
 
+        glGetIntegerv(GL_FRONT_FACE, &FaceOrientation);
+
         glGetFloatv(GL_MODELVIEW_MATRIX, OpenGL::modelview);
         glGetFloatv(GL_PROJECTION_MATRIX, OpenGL::projection);
         glGetIntegerv(GL_VIEWPORT, OpenGL::canvasPos);
@@ -97,22 +101,84 @@ namespace OpenCSG {
         }
 #endif
 
+        // these variables are for a heuristic that makes the pbuffer smaller
+        // if the size of the pbuffer has been bigger than necessary in 
+        // x- or y- direction for resizePBufferLimit frames. 
+        //
+        // this permits to use OpenCSG for CSG rendering in different
+        // canvases with different sizes without constant expensive
+        // resizing of the pbuffer for every frame.
+        //
+        // possible improvements: 
+        //   - the algorithm is not beautifully implemented. maybe encapsulate it?
+        //   - allow the user to define the resizePBufferLimit?
+        static const unsigned int resizePBufferLimit = 100;
+        static unsigned int resizePBufferCounterX = 0;
+        static unsigned int resizePBufferCounterY = 0;
+        static int maxPBufferSizeX = 1;
+        static int maxPBufferSizeY = 1;
+
         bool rebuild = false;
         if (pbuffer_ == 0) {
             pbuffer_ = new RenderTexture(tx, ty);
             rebuild = true;
-        } else if ((tx != pbuffer_->GetWidth()) || (ty != pbuffer_->GetHeight())) {
-            if (tx != 0 && ty != 0) {
-                // this happens if the window is minimized
-                pbuffer_->Reset(tx, ty);
+        // tx == ty == 0 happens if the window is minimized, in this case don't touch a thing
+        } else if (tx != 0 && ty != 0) {
+            
+            // check whether the pbuffer is too small, in case resize immediately
+            if ((tx > pbuffer_->GetWidth()) || (ty > pbuffer_->GetHeight())) {
+                pbuffer_->Reset(std::max(maxPBufferSizeX, tx), std::max(maxPBufferSizeY, ty));
                 rebuild = true;
+            }           
+
+            // if x-size matches exactly, remember to not resize in the next resizePBufferLimit frames
+            if (tx == pbuffer_->GetWidth()) {
+                resizePBufferCounterX = 0;
+                maxPBufferSizeX = tx;
             }
+            // else remember the biggest X in the last resizePBufferCounterX frames
+              else if (tx < pbuffer_->GetWidth()) {
+                ++resizePBufferCounterX;
+                maxPBufferSizeX = std::max(maxPBufferSizeX, tx);
+            }
+
+            // if y-size matches exactly, remember to not resize in the next resizePBufferLimit frames
+            if (ty == pbuffer_->GetHeight()) {
+                resizePBufferCounterY = 0;
+                maxPBufferSizeY = ty;
+            } 
+            // else remember the biggest Y in the last resizePBufferCounterY frames
+            else if (ty < pbuffer_->GetHeight()) {
+                ++resizePBufferCounterY;
+                maxPBufferSizeY = std::max(maxPBufferSizeY, ty);
+            }
+
+            // X or Y have been smaller than the PBuffer-Size in the last resizePBufferLimit frames
+            // -> resize!
+            if (resizePBufferCounterX >= resizePBufferLimit || resizePBufferCounterY >= resizePBufferLimit) {
+                if (maxPBufferSizeX != pbuffer_->GetWidth() || maxPBufferSizeY != pbuffer_->GetHeight()) {
+                    // a beautiful algorithm would ensure that this inner if-condition 
+                    // would always be fulfilled.  
+                    pbuffer_->Reset(maxPBufferSizeX, maxPBufferSizeY);
+                    rebuild = true;
+                }
+                resizePBufferCounterX = 0;
+                resizePBufferCounterY = 0;
+                maxPBufferSizeX = tx;
+                maxPBufferSizeY = ty;
+            }
+
         }
 
         if (rebuild) {
             if (!pbuffer_->Initialize(true, true, true, false, false, 8, 8, 8, 8, updateMode)) {
                 assert(0);
             }
+
+            resizePBufferCounterX = 0;
+            resizePBufferCounterY = 0;
+            maxPBufferSizeX = tx;
+            maxPBufferSizeY = ty;
 
             assert(pbuffer_->HasStencil());
 
@@ -163,6 +229,8 @@ namespace OpenCSG {
             glGetIntegerv(GL_STENCIL_BITS, &OpenGL::stencilBits);
             OpenGL::stencilMax = 1 << OpenGL::stencilBits;
             OpenGL::stencilMask = OpenGL::stencilMax - 1;
+
+            glFrontFace(FaceOrientation);
 
             currentChannel_ = NoChannel;
             occupiedChannels_ = NoChannel;
@@ -279,8 +347,8 @@ namespace OpenCSG {
         if (pbuffer_->GetTextureTarget() == GL_TEXTURE_2D) {
             // with ordinary pow-of-two texture coordinates are between 0 and 1
             // but we must assure only the used part of the texture is taken.
-            factorX /= static_cast<float>(nextPow2(dx));
-            factorY /= static_cast<float>(nextPow2(dy));
+            factorX /= static_cast<float>(pbuffer_->GetWidth());
+            factorY /= static_cast<float>(pbuffer_->GetHeight());
         }
 
         float   texCorrect[16] = { factorX, 0.0, 0.0, 0.0, 
