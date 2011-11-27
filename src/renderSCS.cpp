@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002, 2003
+// Copyright (C) 2002-2004
 // Hasso-Plattner-Institute at the University of Potsdam, Germany, and Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
@@ -26,6 +26,7 @@
 #include "opencsgRender.h"
 #include "batch.h"
 #include "channelManager.h"
+#include "occlusionQueryAdapter.h"
 #include "openglHelper.h"
 #include "primitiveHelper.h"
 #include "scissorMemo.h"
@@ -75,7 +76,7 @@ namespace OpenCSG {
                     glCullFace((*j)->getOperation() == Intersection ? GL_BACK : GL_FRONT);
                     RenderData* primitiveData = getRenderData(*j);
                     unsigned char id = primitiveData->stencilID_;
-                    glAlphaFunc(GL_EQUAL, static_cast<float>(id) / 255.0);
+                    glAlphaFunc(GL_EQUAL, static_cast<float>(id) / 255.0f);
                     (*j)->render();
                 }
             }
@@ -254,8 +255,7 @@ namespace OpenCSG {
             glEnable(GL_STENCIL_TEST);
             glEnable(GL_CULL_FACE);
 
-            GLuint query;
-            glGenOcclusionQueriesNV(1, &query);
+            OpenGL::OcclusionQueryAdapter* occlusionTest = OpenGL::getOcclusionQuery();
 
             std::vector<unsigned int> fragmentcount(numberOfBatches, 0);
 
@@ -280,13 +280,13 @@ namespace OpenCSG {
                 glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
                 glCullFace(GL_BACK);
 
-                glBeginOcclusionQueryNV(query);
+                occlusionTest->beginQuery();
                 { 
                     for (Batch::const_iterator j = i->begin(); j != i->end(); ++j) {
                         (*j)->render();
                     }
                 }
-                glEndOcclusionQueryNV();
+                occlusionTest->endQuery();
                 // the fragment count query could occur here, but benches show that
                 // the algorithm is faster if the query is delayed.
                 // where front faces have been visible, render back faces
@@ -305,8 +305,7 @@ namespace OpenCSG {
                     }
                 }
 
-                unsigned int newFragmentCount;
-                glGetOcclusionQueryuivNV(query, GL_PIXEL_COUNT_NV, &newFragmentCount);
+                unsigned int newFragmentCount = occlusionTest->getQueryResult();
                 if (newFragmentCount != fragmentcount[idx]) {
                     fragmentcount[idx] = newFragmentCount;
                     shapesWithoutUpdate = 0;
@@ -324,7 +323,7 @@ namespace OpenCSG {
 
             } while (shapesWithoutUpdate < numberOfBatches);
 
-            glDeleteOcclusionQueriesNV(1, &query);
+            delete occlusionTest;
 
             glDisable(GL_STENCIL_TEST);
         }

@@ -9,38 +9,48 @@ const GLubyte* glewGetErrorString (GLenum error)
 {
   static const GLubyte* _glewErrorString[] =
   {
-    "no error",
-    "missing GL version",
-    "GL 1.1 and up are not supported",
-    "GLX 1.2 and up are not supported",
-    "unknown error"
+    (const GLubyte*)"No error",
+    (const GLubyte*)"Missing GL version",
+    (const GLubyte*)"GL 1.1 and up are not supported",
+    (const GLubyte*)"GLX 1.2 and up are not supported",
+    (const GLubyte*)"Unknown error"
   };
-  if (error > sizeof(_glewErrorString)) error = sizeof(_glewErrorString);
-  return _glewErrorString[error];
+  const int max_error = sizeof(_glewErrorString)/sizeof(*_glewErrorString) - 1;
+  return _glewErrorString[(int)error > max_error ? max_error : (int)error];
 }
 
 const GLubyte* glewGetString (GLenum name)
 {
   static const GLubyte* _glewString[] =
   {
-    NULL,
-    "GLEW_VERSION_STRING"
+    (const GLubyte*)NULL,
+    (const GLubyte*)"GLEW_VERSION_STRING"
   };
-  if (name > sizeof(_glewString)-1) return NULL;
-  return _glewString[name];
+  const int max_string = sizeof(_glewString)/sizeof(*_glewString) - 1;
+  return _glewString[(int)name > max_string ? 0 : (int)name];
 }
 
 /* ------------------------------------------------------------------------ */
 
 GLboolean glewExperimental = GL_FALSE;
 
+#ifndef GLEW_MX
+
 GLenum glewInit ()
 {
   GLenum r;
-  if ( (r = _glewInit()) ) return r;
-#ifdef _WIN32
-  return _wglewInit();
-#else /* _UNIX */
-  return _glxewInit();
+  if ( (r = glewContextInit()) ) return r;
+#if defined(_WIN32)
+  return wglewContextInit();
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
+  return glxewContextInit();
+#else
+  return r;
 #endif /* _WIN32 */
 }
+
+#else
+
+
+#endif
+

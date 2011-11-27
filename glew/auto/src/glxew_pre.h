@@ -1,8 +1,8 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2003, 2002, Milan Ikits <milan.ikits@ieee.org>
-** Copyright (C) 2003, 2002, Marcelo E. Magallon <mmagallo@debian.org>
-** Copyright (C) 2002, Lev Povalahev <levp@gmx.net>
+** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
+** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without 
@@ -57,8 +57,6 @@
 #endif
 
 #define __glxext_h_
-
-#ifndef _WIN32
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -121,8 +119,7 @@ extern void glXWaitX (void);
 extern void glXSwapBuffers (Display *dpy, GLXDrawable drawable);
 extern void glXUseXFont (Font font, int first, int count, int listBase);
 
-GLEWAPI GLboolean GLXEW_VERSION_1_0;
-#define glxew_VERSION_1_0 GLXEW_VERSION_1_0
+#define GLXEW_VERSION_1_0 GLXEW_GET_VAR(__GLXEW_VERSION_1_0)
 
 #endif /* GLX_VERSION_1_0 */
 
@@ -139,8 +136,7 @@ extern const char* glXQueryExtensionsString (Display *dpy, int screen);
 extern const char* glXGetClientString (Display *dpy, int name);
 extern const char* glXQueryServerString (Display *dpy, int screen, int name);
 
-GLEWAPI GLboolean GLXEW_VERSION_1_1;
-#define glxew_VERSION_1_1 GLXEW_VERSION_1_1
+#define GLXEW_VERSION_1_1 GLXEW_GET_VAR(__GLXEW_VERSION_1_1)
 
 #endif /* GLX_VERSION_1_1 */
 

@@ -11,9 +11,30 @@
 #define GLEW_VERSION 1
 
 /* API */
-GLEWAPI GLboolean glewExperimental;
+#ifdef GLEW_MX
+
+typedef struct GLEWContextStruct GLEWContext;
+GLEWAPI GLenum glewContextInit (GLEWContext* ctx);
+
+#ifdef _WIN32
+#  define GLEW_GET_VAR(x) glewGetContext()->x
+#  define GLEW_GET_FUN(x) glewGetContext()->x
+#else
+#  define GLEW_GET_VAR(x) glewGetContext()->x
+#  define GLEW_GET_FUN(x) x
+#endif
+
+#else /* GLEW_MX */
+
 GLEWAPI GLenum glewInit ();
-GLEWAPI GLboolean glewGetExtension (const GLubyte* name);
+
+#define GLEW_GET_VAR(x) x
+#define GLEW_GET_FUN(x) x
+
+#endif /* GLEW_MX */
+
+GLEWAPI GLboolean glewExperimental;
+GLEWAPI GLboolean glewGetExtension (const char* name);
 GLEWAPI const GLubyte* glewGetErrorString (GLenum error);
 GLEWAPI const GLubyte* glewGetString (GLenum name);
 

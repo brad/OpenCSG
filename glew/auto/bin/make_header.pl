@@ -1,11 +1,11 @@
 #!/usr/bin/perl
-#
-# Copyright (C) 2003 Marcelo E. Magallon <mmagallo@debian.org>
-# Copyright (C) 2003 Milan Ikits <milan.ikits@ieee.org>
-#
-# This program is distributed under the terms and conditions of the GNU
-# General Public License Version 2 as published by the Free Software
-# Foundation or, at your option, any later version.
+##
+## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
+## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+##
+## This program is distributed under the terms and conditions of the GNU
+## General Public License Version 2 as published by the Free Software
+## Foundation or, at your option, any later version.
 
 use strict;
 use warnings;
@@ -36,19 +36,15 @@ sub make_pfn_type($%)
 # function name alias
 sub make_pfn_alias($%)
 {
-    return join(" ", "#define", $_[0], prefixname($_[0]))
-}
-
-# function pointer declaration
-sub make_pfn_decl($%)
-{
-    return "GLEWAPI PFN" . (uc $_[0]) . "PROC " . prefixname($_[0]) . ";";
+    our $type;
+    return join(" ", "#define", $_[0], $type . "EW_GET_FUN(" . prefixname($_[0]) . ")")
 }
 
 my @extlist = ();
 my %extensions = ();
 
 our $api = shift;
+our $type = shift;
 
 if (@ARGV)
 {
@@ -68,11 +64,11 @@ foreach my $ext (sort @extlist)
     output_types($types, \&make_type);
     output_exacts($exacts, \&make_exact);
     output_decls($functions, \&make_pfn_type);
-    output_decls($functions, \&make_pfn_decl);
     output_decls($functions, \&make_pfn_alias);
 
     my $extvar = $extname;
     $extvar =~ s/GL(X*)_/GL$1EW_/;
-    print "\nGLEWAPI GLboolean $extvar;\n\n";
-    print "#endif /* $extname */\n\n";
+
+    print "\n#define $extvar " . $type . "EW_GET_VAR(" . prefix_varname($extvar) . ")\n";
+    print "\n#endif /* $extname */\n\n";
 }

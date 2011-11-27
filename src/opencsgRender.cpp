@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002, 2003
+// Copyright (C) 2002-2004
 // Hasso-Plattner-Institute at the University of Potsdam, Germany, and Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
@@ -29,6 +29,10 @@ namespace OpenCSG {
 
     namespace {
 
+        bool haveHardwareOcclusionQueries() {
+            return GLEW_ARB_occlusion_query || GLEW_NV_occlusion_query;
+        }
+
         Algorithm chooseAlgorithm(const std::vector<Primitive*>& primitives) {
             if (Algo::getConvexity(primitives) >= 2) {
                 return Goldfeather;                
@@ -38,7 +42,7 @@ namespace OpenCSG {
 
         DepthComplexityAlgorithm chooseDepthComplexityAlgorithm(const std::vector<Primitive*>& primitives) {
             if (primitives.size() > 20) {
-                if (GLEW_NV_occlusion_query && primitives.size() > 40) {
+                if (haveHardwareOcclusionQueries() && primitives.size() > 40) {
                     return DepthComplexitySampling;
                 }
                 return OcclusionQuery;
@@ -57,7 +61,7 @@ namespace OpenCSG {
             depthComplexityAlgorithm = chooseDepthComplexityAlgorithm(primitives);
         }
 
-        if (depthComplexityAlgorithm == OcclusionQuery && !GLEW_NV_occlusion_query) {
+        if (depthComplexityAlgorithm == OcclusionQuery && !haveHardwareOcclusionQueries()) {
             // hardware support is missing. issue a warning?
             depthComplexityAlgorithm = DepthComplexitySampling;
         }

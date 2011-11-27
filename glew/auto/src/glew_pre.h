@@ -1,8 +1,8 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2003, 2002, Milan Ikits <milan.ikits@ieee.org>
-** Copyright (C) 2003, 2002, Marcelo E. Magallon <mmagallo@debian.org>
-** Copyright (C) 2002, Lev Povalahev <levp@gmx.net>
+** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
+** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without 
@@ -118,9 +118,27 @@
 #define WINGDIAPI __declspec(dllimport)
 #endif
 /* <ctype.h> */
-#ifndef _WCHAR_T_DEFINED
-typedef unsigned short wchar_t;
-#define _WCHAR_T_DEFINED
+#if !defined(__CYGWIN__) && !defined(_WCHAR_T_DEFINED)
+#  ifndef _WCHAR_T_DEFINED
+     typedef unsigned short wchar_t;
+#    define _WCHAR_T_DEFINED
+#  endif
+#endif
+/* <stddef.h> */
+#if !defined(_W64)
+#  if !defined(__midl) && (defined(_X86_) || defined(_M_IX86)) && _MSC_VER >= 1300
+#    define _W64 __w64
+#  else
+#    define _W64
+#  endif
+#endif
+#ifndef _PTRDIFF_T_DEFINED
+#  ifdef  _WIN64
+typedef __int64 ptrdiff_t;
+#  else
+typedef _W64 int ptrdiff_t;
+#  endif
+#  define _PTRDIFF_T_DEFINED
 #endif
 
 #ifndef GLAPI
@@ -150,6 +168,17 @@ typedef unsigned short wchar_t;
 #endif
 
 #else /* _UNIX */
+
+/*
+ * Needed for ptrdiff_t in turn needed by VBO.  This is defined by ISO
+ * C.  On my system, this amounts to _3 lines_ of included code, all of
+ * them pretty much harmless.  If you know of a way of detecting 32 vs
+ * 64 _targets_ at compile time you are free to replace this with
+ * something that's portable.  For now, _this_ is the portable solution.
+ * (mem, 2004-01-04)
+ */
+
+#include <stddef.h>
 
 #define GLEW_APIENTRY_DEFINED
 #define APIENTRY
@@ -1062,12 +1091,17 @@ GLAPI void GLAPIENTRY glVertex4sv (const GLshort *v);
 GLAPI void GLAPIENTRY glVertexPointer (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 GLAPI void GLAPIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei height);
 
-GLEWAPI GLboolean GLEW_VERSION_1_1;
-#define glew_VERSION_1_1 GLEW_VERSION_1_1
+#define GLEW_VERSION_1_1 GLEW_GET_VAR(__GLEW_VERSION_1_1)
 
 #endif /* GL_VERSION_1_1 */
 
-/* ------------------------------------------------------------------------- */
+/* ---------------------------------- GLU ---------------------------------- */
 
 /* this is where we can safely include GLU */
+#if defined(__APPLE__) && defined(__MACH__)
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
+#endif
+
+

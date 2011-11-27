@@ -1,8 +1,8 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2003, 2002, Milan Ikits <milan.ikits@ieee.org>
-** Copyright (C) 2003, 2002, Marcelo E. Magallon <mmagallo@debian.org>
-** Copyright (C) 2002, Lev Povalahev <levp@gmx.net>
+** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
+** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
 ** Redistribution and use in source and binary forms, with or without 
@@ -30,47 +30,101 @@
 */
 
 #include <GL/glew.h>
-#include <GL/wglew.h>
-#include <GL/glxew.h>
+#if defined(_WIN32)
+#  include <GL/wglew.h>
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+#  include <GL/glxew.h>
+#endif
 
-#ifdef _WIN32
-#  define glewGetProcAddress(name) wglGetProcAddress(name)
+#if defined(_WIN32)
+#  define glewGetProcAddress(name) wglGetProcAddress((LPCSTR)name)
 #else
-#  ifdef GLEW_NEEDS_CUSTOM_GET_PROCADDRESS
-#    define glewGetProcAddress(name) __dlopenGetProcAddress(name)
+#  if defined(__APPLE__)
+#    define glewGetProcAddress(name) NSGLGetProcAddress(name)
 #  else
-#    define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
-#  endif /* GLEW_NEEDS_CUSTOM_GET_PROCADDRESS */
-#endif /* _WIN32 */
+#    if defined(__sgi) || defined(__sun)
+#      define glewGetProcAddress(name) dlGetProcAddress(name)
+#    else /* __linux */
+#      define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
+#    endif
+#  endif
+#endif
 
-#ifdef GLEW_NEEDS_CUSTOM_GET_PROCADDRESS
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <stdlib.h>
+#include <string.h>
+
+static void *NSGLGetProcAddress (const GLubyte *name)
+{
+  NSSymbol symbol;
+  char *symbolName;
+  /* prepend a '_' for the Unix C symbol mangling convention */
+  symbolName = malloc(strlen((const char *)name) + 2);
+  strcpy(symbolName+1, (const char *)name);
+  symbolName[0] = '_';
+  symbol = NULL;
+  if (NSIsSymbolNameDefined(symbolName))
+    symbol = NSLookupAndBindSymbol(symbolName);
+  free(symbolName);
+  return symbol ? NSAddressOfSymbol(symbol) : NULL;
+}
+#endif /* __APPLE__ */
+
+#if defined(__sgi) || defined (__sun)
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-static void* __dlopenGetProcAddress (const GLubyte *procName)
+static void *dlGetProcAddress (const GLubyte* name)
 {
   static void *h = NULL;
   static void *gpa;
 
-  if (!h)
+  if (h == NULL)
   {
-    if (!(h = dlopen(NULL, RTLD_LAZY | RTLD_LOCAL))) return NULL;
+    if ((h = dlopen(NULL, RTLD_LAZY | RTLD_LOCAL)) == NULL) return NULL;
     gpa = dlsym(h, "glXGetProcAddress");
   }
 
   if (gpa != NULL)
-    return ((void* (*)(const GLubyte*))gpa)(procName);
+    return ((void *(*)(const GLubyte *))gpa)(name);
   else
-    return dlsym(h, (const char *)procName);
+    return dlsym(h, (const char *)name);
 }
-#endif /* GLEW_NEEDS_CUSTOM_GET_PROCADDRESS */
+#endif /* __sgi || __sun */
 
-/* ----------------------------- GL_VERSION_1_1 ---------------------------- */
+#ifdef GLEW_MX
+#define glewGetContext() ctx
+#define wglewGetContext() ctx
+#define glxewGetContext() ctx
+#ifdef _WIN32
+#define GLEW_CONTEXT_ARG_DEF_INIT GLEWContext* ctx
+#define WGLEW_CONTEXT_ARG_DEF_INIT WGLEWContext* ctx
+#define GLXEW_CONTEXT_ARG_DEF_INIT GLXEWContext* ctx
+#define GLEW_CONTEXT_ARG_VAR_INIT ctx
+#else
+#define GLEW_CONTEXT_ARG_DEF_INIT void
+#define WGLEW_CONTEXT_ARG_DEF_INIT void
+#define GLXEW_CONTEXT_ARG_DEF_INIT void
+#define GLEW_CONTEXT_ARG_VAR_INIT
+#endif
+#define GLEW_CONTEXT_ARG_DEF_LIST GLEWContext* ctx
+#define WGLEW_CONTEXT_ARG_DEF_LIST WGLEWContext* ctx
+#define GLXEW_CONTEXT_ARG_DEF_LIST GLXEWContext* ctx
+#else
+#define GLEW_CONTEXT_ARG_DEF_INIT void
+#define WGLEW_CONTEXT_ARG_DEF_INIT void
+#define GLXEW_CONTEXT_ARG_DEF_INIT void
+#define GLEW_CONTEXT_ARG_DEF_LIST void
+#define WGLEW_CONTEXT_ARG_DEF_LIST void
+#define GLXEW_CONTEXT_ARG_DEF_LIST void
+#define GLEW_CONTEXT_ARG_VAR_INIT
+#endif
 
-#ifdef GL_VERSION_1_1
+#if !defined(_WIN32) || !defined(GLEW_MX)
 
-GLboolean GLEW_VERSION_1_1 = GL_FALSE;
-
-#endif /* GL_VERSION_1_1 */
+GLboolean __GLEW_VERSION_1_1 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_0 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_1 = GL_FALSE;
 

@@ -1,11 +1,11 @@
 #!/usr/bin/perl
-#
-# Copyright (C) 2003 Marcelo E. Magallon <mmagallo@debian.org>
-# Copyright (C) 2003 Milan Ikits <milan.ikits@ieee.org>
-#
-# This program is distributed under the terms and conditions of the GNU
-# General Public License Version 2 as published by the Free Software
-# Foundation or, at your option, any later version.
+##
+## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
+## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+##
+## This program is distributed under the terms and conditions of the GNU
+## General Public License Version 2 as published by the Free Software
+## Foundation or, at your option, any later version.
 
 use strict;
 use warnings;
@@ -45,14 +45,15 @@ my %typemap = (
     ushort   => "GLushort",
     DMbuffer => "void *",
 
-    # ARB VBO introduces this, no idea how to handle it properly.  The spec
-    # file babbles about how great this will be on 64 bit systems, but doesn't
-    # actually say how to define this nor how to detect that this has been
-    # defined (i.e., is this tied to the VBO spec or not?).  For now I'll just
-    # use GLEWtype and have it defined in a preamble.  (mem, 2003-03-23)
+    # ARB VBO introduces these.
 
     sizeiptrARB => "GLsizeiptrARB",
     intptrARB   => "GLintptrARB",
+
+    # ARB shader objects introduces these, charARB is at least 8 bits,
+    # handleARB is at least 32 bits
+    charARB => "GLcharARB",
+    handleARB => "GLhandleARB",
 
     # GLX 1.3 defines new types which might not be available at compile time
 
@@ -70,7 +71,7 @@ my %typemap = (
 );
 
 my %voidtypemap = (
-    void     => "GLvoid ",
+    void    => "GLvoid",
 );
 
 my %taboo_tokens = (
@@ -115,7 +116,7 @@ my %regex = (
     prefix   => qr/^(?:[aw]?gl|glX)/, # (agl,wgl,glX) + cluster wo/ capturing
     tprefix  => qr/^(?:[AW]?GL|GLX)_/, # (AGL,WGL,GLX) + cluster wo/ capturing
     section  => compile_regex('^(', join('|', @sections), ')$'), # sections in spec
-    token    => qr/^([A-Z][A-Z0-9_]*):?\s+((?:0x)?[0-9A-F]+)(.*)$/, # define tokens
+    token    => qr/^([A-Z0-9][A-Z0-9_]*):?\s+((?:0x)?[0-9A-F]+)(.*)$/, # define tokens
     types    => compile_regex('\b(', join('|', keys %typemap), ')\b'), # var types
     voidtype => compile_regex('\b(', keys %voidtypemap, ')\b '), # void type
 );

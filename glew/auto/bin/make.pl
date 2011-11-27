@@ -1,16 +1,16 @@
-#
-# Copyright (C) 2003 Marcelo E. Magallon <mmagallo@debian.org>
-# Copyright (C) 2003 Milan Ikits <milan.ikits@ieee.org>
-#
-# This program is distributed under the terms and conditions of the GNU
-# General Public License Version 2 as published by the Free Software
-# Foundation or, at your option, any later version.
+##
+## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
+## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+##
+## This program is distributed under the terms and conditions of the GNU
+## General Public License Version 2 as published by the Free Software
+## Foundation or, at your option, any later version.
 
 my %regex = (
     extname  => qr/^[A-Z][A-Za-z0-9_]+$/,
     exturl   => qr/^http.+$/,
     function => qr/^(.+) ([a-z][a-z0-9_]*) \((.+)\)$/i, 
-    token    => qr/^([A-Z][A-Z0-9_]*)\s+((?:0x)?[0-9A-F]+)$/,
+    token    => qr/^([A-Z][A-Z0-9_]*)\s+((?:0x)?[0-9A-F]+|[A-Z][A-Z0-9_]*)$/,
     type     => qr/^typedef\s+(.+)\s+([\*A-Za-z0-9_]+)$/,
     exact    => qr/.*;$/,
 );
@@ -19,7 +19,15 @@ my %regex = (
 sub prefixname($)
 {
     my $name = $_[0];
-    $name =~ s/^(.*)gl/$1glew/;
+    $name =~ s/^(.*)gl/__$1glew/;
+    return $name;
+}
+
+# prefix function name with glew
+sub prefix_varname($)
+{
+    my $name = $_[0];
+    $name =~ s/^(.*)GL(X*)EW/__$1GL$2EW/;
     return $name;
 }
 

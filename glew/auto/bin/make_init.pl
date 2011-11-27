@@ -1,36 +1,32 @@
 #!/usr/bin/perl
-#
-# Copyright (C) 2003 Marcelo E. Magallon <mmagallo@debian.org>
-# Copyright (C) 2003 Milan Ikits <milan.ikits@ieee.org>
-#
-# This program is distributed under the terms and conditions of the GNU
-# General Public License Version 2 as published by the Free Software
-# Foundation or, at your option, any later version.
+##
+## Copyright (C) 2004, 2003 Marcelo E. Magallon <mmagallo[at]debian org>
+## Copyright (C) 2004, 2003 Milan Ikits <milan ikits[at]ieee org>
+##
+## This program is distributed under the terms and conditions of the GNU
+## General Public License Version 2 as published by the Free Software
+## Foundation or, at your option, any later version.
 
 use strict;
 use warnings;
 
 do 'bin/make.pl';
 
-#---------------------------------------------------------------------------------------
-
-# function pointer definition
-sub make_pfn_def($%)
-{
-    return "PFN" . (uc $_[0]) . "PROC " . prefixname($_[0]) . " = NULL;";
-}
+#-------------------------------------------------------------------------------
 
 # function pointer definition
 sub make_pfn_def_init($%)
 {
-    my $name = prefixname($_[0]);
-    return "  r = ((" . $name . " = (PFN" . (uc $_[0]) . "PROC)glewGetProcAddress(\"" . $_[0] . "\")) == NULL) || r;";
+    #my $name = prefixname($_[0]);
+    return "  r = ((" . $_[0] . " = (PFN" . (uc $_[0]) . "PROC)glewGetProcAddress((const GLubyte*)\"" . $_[0] . "\")) == NULL) || r;";
 }
 
-#---------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 my @extlist = ();
 my %extensions = ();
+
+our $type = shift;
 
 if (@ARGV)
 {
@@ -42,24 +38,21 @@ if (@ARGV)
 
 foreach my $ext (sort @extlist)
 {
-    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
+    my ($extname, $exturl, $types, $tokens, $functions, $exacts) = 
+      parse_ext($ext);
 
     make_separator($extname);
-    print "#ifdef $extname\n";
-    if (keys %$functions)
-    {
-	output_decls($functions, \&make_pfn_def);
-	print "\n";
-    }
+    print "#ifdef $extname\n\n";
     my $extvar = $extname;
     my $extvardef = $extname;
     $extvar =~ s/GL(X*)_/GL$1EW_/;
     if (keys %$functions)
     {
-	print "static GLboolean _glewInit_$extname (void)\n{\n  GLboolean r = GL_FALSE;\n";
+	print "static GLboolean _glewInit_$extname (" . $type . 
+	  "EW_CONTEXT_ARG_DEF_INIT)\n{\n  GLboolean r = GL_FALSE;\n";
 	output_decls($functions, \&make_pfn_def_init);
 	print "\n  return r;\n}\n";
     }
-    print "\nGLboolean $extvar = GL_FALSE;\n\n";
+    #print "\nGLboolean " . prefix_varname($extvar) . " = GL_FALSE;\n\n";
     print "#endif /* $extname */\n\n";
 }

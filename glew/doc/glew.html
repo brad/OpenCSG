@@ -1,6 +1,6 @@
 <!--
- Copyright (C) 2003, 2002, Milan Ikits <milan.ikits@ieee.org>
- Copyright (C) 2003, 2002, Marcelo E. Magallon <mmagallo@debian.org>
+ Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
+ Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
  This documentation may not be modified or redistributed in any
  form, except by the copyright holder.
 -->
@@ -28,7 +28,9 @@ GLEW: OpenGL Extensions Supported
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/client_storage.txt">APPLE_client_storage</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/element_array.txt">APPLE_element_array</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/fence.txt">APPLE_fence</a><br>
+<a href="http://developer.apple.com/opengl/extensions/apple_float_pixels.html">APPLE_float_pixels</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/specular_vector.txt">APPLE_specular_vector</a><br>
+<a href="http://developer.apple.com/opengl/extensions/apple_texture_range.html">APPLE_texture_range</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/transform_hint.txt">APPLE_transform_hint</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/vertex_array_object.txt">APPLE_vertex_array_object</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/APPLE/vertex_array_range.txt">APPLE_vertex_array_range</a><br>
@@ -36,6 +38,7 @@ GLEW: OpenGL Extensions Supported
 <br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/depth_texture.txt">ARB_depth_texture</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/fragment_program.txt">ARB_fragment_program</a><br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/fragment_shader.txt">ARB_fragment_shader</a><br>
 ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/matrix_palette.txt">ARB_matrix_palette</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/multisample.txt">ARB_multisample</a><br>
@@ -43,6 +46,7 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/occlusion_query.txt">ARB_occlusion_query</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/point_parameters.txt">ARB_point_parameters</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/point_sprite.txt">ARB_point_sprite</a><br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/shader_objects.txt">ARB_shader_objects</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/shading_language_100.txt">ARB_shading_language_100</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/shadow.txt">ARB_shadow</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/shadow_ambient.txt">ARB_shadow_ambient</a><br>
@@ -59,6 +63,7 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/vertex_blend.txt">ARB_vertex_blend</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/vertex_buffer_object.txt">ARB_vertex_buffer_object</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/vertex_program.txt">ARB_vertex_program</a><br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/vertex_shader.txt">ARB_vertex_shader</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/ARB/window_pos.txt">ARB_window_pos</a><br>
 <br>
 <a href="http://www.ati.com/developer/atiopengl.pdf">ATIX_point_sprites</a><br>
@@ -85,6 +90,7 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/abgr.txt">EXT_abgr</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/bgra.txt">EXT_bgra</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/blend_color.txt">EXT_blend_color</a><br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/blend_equation_separate.txt">EXT_blend_equation_separate</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/blend_func_separate.txt">EXT_blend_func_separate</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/blend_logic_op.txt">EXT_blend_logic_op</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/blend_minmax.txt">EXT_blend_minmax</a><br>
@@ -128,6 +134,8 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture.txt">EXT_texture</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture3D.txt">EXT_texture3D</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture_compression_s3tc.txt">EXT_texture_compression_s3tc</a><br>
+<a href="http://www.nvidia.com/dev_content/nvopenglspecs/GL_EXT_texture_cube_map.txt">EXT_texture_cube_map</a><br>
+<a href="http://www.opengl.org/developers/documentation/Version1.2/1.2specs/texture_edge_clamp.txt">EXT_texture_edge_clamp</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture_env.txt">EXT_texture_env</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture_env_add.txt">EXT_texture_env_add</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/EXT/texture_env_combine.txt">EXT_texture_env_combine</a><br>
@@ -160,8 +168,10 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/INTEL/parallel_arrays.txt">INTEL_parallel_arrays</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/INTEL/texture_scissor.txt">INTEL_texture_scissor</a><br>
 <br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/MESA/pack_invert.txt">MESA_pack_invert</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/MESA/resize_buffers.txt">MESA_resize_buffers</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/MESA/window_pos.txt">MESA_window_pos</a><br>
+<a href="http://oss.sgi.com/projects/ogl-sample/registry/MESA/ycbcr_texture.txt">MESA_ycbcr_texture</a><br>
 <br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/NV/blend_square.txt">NV_blend_square</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/NV/copy_depth_to_color.txt">NV_copy_depth_to_color</a><br>
@@ -263,20 +273,21 @@ ARB_imaging<br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/convolution_border_modes.txt">SUN_convolution_border_modes</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/global_alpha.txt">SUN_global_alpha</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/mesh_array.txt">SUN_mesh_array</a><br>
+<a href="http://wwws.sun.com/software/graphics/opengl/extensions/gl_sun_read_video_pixels.txt">SUN_read_video_pixels</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/slice_accum.txt">SUN_slice_accum</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/triangle_list.txt">SUN_triangle_list</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/SUN/vertex.txt">SUN_vertex</a><br>
 <br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/WIN/phong_shading.txt">WIN_phong_shading</a><br>
 <a href="http://oss.sgi.com/projects/ogl-sample/registry/WIN/specular_fog.txt">WIN_specular_fog</a><br>
-WIN_swap_hint<br>
+<a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/opengl/glfunc01_16zy.asp">WIN_swap_hint</a><br>
 <br></td></tr>
 <tr>
 <td bgcolor="#fff0d0">
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
 <td align="right">
-<i>Last update: 09-15-03</i></td>
+<i>Last update: 02-19-04</i></td>
 </tr>
 </table>
 </td>
