@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2006, Florian Kirsch,
+// Copyright (C) 2002-2009, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -355,7 +355,6 @@ namespace OpenCSG {
 
             glStencilMask(OpenGL::stencilMask);
             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glEnable(GL_STENCIL_TEST);
 
             glDepthFunc(GL_ALWAYS);
             glDepthMask(GL_TRUE);
@@ -418,6 +417,7 @@ namespace OpenCSG {
 
             channelMgr->renderToChannel(true);
 
+            glStencilMask(OpenGL::stencilMask);
             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
             glDepthFunc(GL_ALWAYS);
