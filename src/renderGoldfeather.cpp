@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -262,12 +262,6 @@ namespace OpenCSG {
 
     void renderGoldfeather(const std::vector<Primitive*>& primitives) 
     {
-        channelMgr = new GoldfeatherChannelManager;
-        if (!channelMgr->init())
-        {
-            delete channelMgr;
-            return;
-        }
         scissor = new ScissorMemo;
 
         Batcher batches(primitives);
@@ -332,17 +326,10 @@ namespace OpenCSG {
         
         delete scissor;
         delete stencilMgr;
-        delete channelMgr;
     }
 
-    void renderOcclusionQueryGoldfeather(const std::vector<Primitive*>& primitives) 
+    bool renderOcclusionQueryGoldfeather(const std::vector<Primitive*>& primitives)
     {
-        channelMgr = new GoldfeatherChannelManager;
-        if (!channelMgr->init())
-        {
-            delete channelMgr;
-            return;
-        }
         scissor = new ScissorMemo;
 
         unsigned int layer = 0;
@@ -352,6 +339,8 @@ namespace OpenCSG {
         scissor->setCurrent(primitives);
 
         OpenGL::OcclusionQuery* occlusionTest = 0;
+
+        bool retVal = true;
 
         while (true) {
             if (channelMgr->request() == NoChannel) {
@@ -363,7 +352,11 @@ namespace OpenCSG {
             scissor->enableScissor();
 
             if (!occlusionTest) {
-                occlusionTest = OpenGL::getOcclusionQuery();
+                occlusionTest = OpenGL::getOcclusionQuery(false);
+                if (!occlusionTest) {
+                    retVal = false;
+                    break;
+                }
             }
 
             channelMgr->renderToChannel(true);
@@ -384,8 +377,9 @@ namespace OpenCSG {
 
             parityTestAndDiscard(primitives, primitives, true, OpenGL::stencilMax);
 
-            unsigned int fragmentCount = occlusionTest->getQueryResult();
-            if (fragmentCount == 0) {
+            unsigned int anyFragmentRendered = occlusionTest->getQueryResult();
+            if (!anyFragmentRendered) {
+                retVal = true;
                 break;
             }
 
@@ -403,17 +397,12 @@ namespace OpenCSG {
 
         delete scissor;
         delete stencilMgr;
-        delete channelMgr;
+
+        return retVal;
     }
 
     void renderDepthComplexitySamplingGoldfeather(const std::vector<Primitive*>& primitives) 
     {
-        channelMgr = new GoldfeatherChannelManager;
-        if (!channelMgr->init())
-        {
-            delete channelMgr;
-            return;
-        }
         scissor = new ScissorMemo;
 
         scissor->setIntersected(primitives);
@@ -459,6 +448,29 @@ namespace OpenCSG {
 
         delete scissor;
         delete stencilMgr;
+    }
+
+    void renderGoldfeather(const std::vector<Primitive*>& primitives, DepthComplexityAlgorithm algorithm)
+    {
+        channelMgr = new GoldfeatherChannelManager;
+        if (channelMgr->init())
+        {
+            switch (algorithm) {
+            case OcclusionQuery:
+                if (renderOcclusionQueryGoldfeather(primitives))
+                    break;  // success
+                            // else fall through (should not happen in practice due to the check for extensions of the caller)
+            case NoDepthComplexitySampling:
+                renderGoldfeather(primitives);
+                break;
+            case DepthComplexitySampling:
+                renderDepthComplexitySamplingGoldfeather(primitives);
+                break;
+            case DepthComplexityAlgorithmUnused:
+                break; // does not happen
+            }
+        }
+
         delete channelMgr;
     }
 

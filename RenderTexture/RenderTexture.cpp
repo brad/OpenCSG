@@ -39,7 +39,14 @@
 * Implementation of class RenderTexture.  A multi-format render to 
 * texture wrapper.
 */
+
+#ifndef __APPLE__
+
+#ifdef _MSC_VER
+#if _MSC_VER < 1300 // MSVC++ <= 6.0
 #pragma warning(disable:4786)
+#endif
+#endif
 
 #include "RenderTexture.h"
 #include <stdio.h>
@@ -96,8 +103,8 @@ RenderTexture::RenderTexture(const char *strMode)
     _pDisplay(NULL),
     _hGLContext(NULL),
     _hPBuffer(0),
-    _hPreviousContext(0),
     _hPreviousDrawable(0),
+    _hPreviousContext(0),
 #endif
     _iTextureTarget(GL_NONE),
     _iTextureID(0),
@@ -216,7 +223,7 @@ void _wglGetLastError()
 * @fn PrintExtensionError( char* strMsg, ... )
 * @brief Prints an error about missing OpenGL extensions.
 */ 
-void PrintExtensionError( char* strMsg, ... )
+void PrintExtensionError( const char* strMsg, ... )
 {
     fprintf(stderr, 
             "Error: RenderTexture requires the following unsupported "
@@ -404,10 +411,6 @@ bool RenderTexture::Initialize(int width, int height,
     int screen = DefaultScreen(_pDisplay);
     XVisualInfo *visInfo;
     
-    int iFormat = 0;
-    int iNumFormats;
-    int attrib = 0;
-    
     GLXFBConfigSGIX *fbConfigs;
     int nConfigs;
 
@@ -463,11 +466,13 @@ bool RenderTexture::Initialize(int width, int height,
             return false;
         }
     }
-    
-    glXQueryGLXPbufferSGIX(_pDisplay, _hPBuffer, GLX_WIDTH_SGIX, 
-                           (GLuint*)&_iWidth);
-    glXQueryGLXPbufferSGIX(_pDisplay, _hPBuffer, GLX_HEIGHT_SGIX, 
-                           (GLuint*)&_iHeight);
+
+    // [Florian] ATI returns 0 for this. There is no reason for width and
+    //           and height to differ anyway, so comment this out
+    //glXQueryGLXPbufferSGIX(_pDisplay, _hPBuffer, GLX_WIDTH_SGIX, 
+    //                       (GLuint*)&_iWidth);
+    //glXQueryGLXPbufferSGIX(_pDisplay, _hPBuffer, GLX_HEIGHT_SGIX, 
+    //                       (GLuint*)&_iHeight);
     
     _bInitialized = true;
     
@@ -845,8 +850,6 @@ bool RenderTexture::EndCapture()
  */ 
 bool RenderTexture::BeginCapture(RenderTexture* current)
 {
-    bool bContextReset = false;
-    
     if (current == this) {
         return true; // no switch necessary
     }
@@ -1268,8 +1271,12 @@ void RenderTexture::_ParseModeString(const char *modeString,
         {            
             _bIsTexture = true;
             
-            if ((kv.first == "texRECT") && GLEW_NV_texture_rectangle)
-            {
+            if (   (kv.first == "texRECT")
+                && (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle)
+#ifdef _WIN32
+                && (WGLEW_ATI_render_texture_rectangle || WGLEW_NV_render_texture_rectangle)
+#endif
+            ) {
                 _bRectangle = true;
                 bBindRECT = true;
             }
@@ -1405,7 +1412,10 @@ void RenderTexture::_ParseModeString(const char *modeString,
         if (bBindRECT)
         {
             pbAttribs.push_back(WGL_TEXTURE_TARGET_ARB);
-            pbAttribs.push_back(WGL_TEXTURE_RECTANGLE_NV);
+            if (WGLEW_ATI_render_texture_rectangle)
+                pbAttribs.push_back(WGL_TEXTURE_RECTANGLE_ATI);
+            else if (WGLEW_NV_render_texture_rectangle)
+                pbAttribs.push_back(WGL_TEXTURE_RECTANGLE_NV);
         }
         else if (bBindCUBE)
         {
@@ -1425,8 +1435,7 @@ void RenderTexture::_ParseModeString(const char *modeString,
         }
 
 #elif defined(DEBUG) || defined(_DEBUG)
-        printf("RenderTexture Error: Render to Texture not "
-               "supported in Linux\n");
+        printf("RenderTexture Error: Render to Texture not supported\n");
 #endif  
     }
 
@@ -1673,9 +1682,9 @@ bool RenderTexture::_VerifyExtensions()
         PrintExtensionError("WGL_ARB_render_texture");
         return false;
     }
-    if (_bRectangle && !GLEW_NV_texture_rectangle)
+    if (_bRectangle && !(GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle))
     {
-        PrintExtensionError("GL_NV_texture_rectangle");
+        PrintExtensionError("GLEW_ARB_texture_rectangle or GLEW_EXT_texture_rectangle or GL_NV_texture_rectangle");
         return false;
     }
     if (_bFloat && !(GLEW_NV_float_buffer || WGLEW_ATI_pixel_format_float))
@@ -1747,8 +1756,8 @@ bool RenderTexture::_InitializeTextures()
     // Determine the appropriate texture formats and filtering modes.
     if (_bIsTexture || _bIsDepthTexture)
     {
-        if (_bRectangle && GLEW_NV_texture_rectangle)
-            _iTextureTarget = GL_TEXTURE_RECTANGLE_NV;
+        if (_bRectangle && (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle))
+            _iTextureTarget = GL_TEXTURE_RECTANGLE_ARB;
         else
             _iTextureTarget = GL_TEXTURE_2D;
     }
@@ -2034,3 +2043,5 @@ bool RenderTexture::_MakeCurrent()
 
     return true;
 }
+
+#endif // __APPLE__

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -27,6 +27,11 @@
 #define __OpenCSG__opencsg_h__
 
 #include <vector>
+
+/// OpenCSG version. The version number has been introduced with version 1.3.2.
+/// Format is Major|Minor|Patch, each of them being 4-bit wide.
+#define OPENCSG_VERSION 0x0132
+#define OPENCSG_VERSION_STRING "OpenCSG 1.3.2"
 
 namespace OpenCSG {
 
@@ -179,20 +184,20 @@ namespace OpenCSG {
     ///   - AutomaticOffscreenType: Chooses internally depending on available
     ///                  OpenGL extensions. If graphics hardware supports different
     ///                  extensions, with most precedence ARB frame buffer objects
-    ///                  are used, the PBuffers, then EXT frame buffer objects. 
+    ///                  are used, then EXT frame buffer objects, then PBuffers.
     ///   - FrameBufferObject: Uses frame buffer objects. This method does 
     ///                  not require context switches on the graphics hardware
     ///                  to change between offscreen and main frame buffer, so
     ///                  in theory this method should be faster. Both ARB and
     ///                  EXT frame buffer objects OpenGL extensions are supported
     ///                  internally; ARB frame buffer objects are used if both 
-    ///                  are supported by the graphics hardware. 
+    ///                  are supported by the graphics hardware.
     ///   - PBuffer: Uses PBuffers. This is the older offscreen type, which
     ///                  is likely to work with older graphics hardware and
     ///                  drivers.
     ///   - FrameBufferObjectARB: Forces ARB frame buffer objects to be used.
     ///   - FrameBufferObjectEXT: Forces EXT frame buffer objects to be used.
-    ///   - OffscreenTypeUnused: Invalid input. 
+    ///   - OffscreenTypeUnused: Invalid input.
     enum OffscreenType {
         AutomaticOffscreenType = 0,
         FrameBufferObject      = 1,

@@ -1,5 +1,6 @@
 GL_VERSION_2_0
 http://www.opengl.org/documentation/specs/version2.0/glspec20.pdf
+
 	GL_BLEND_EQUATION_RGB GL_BLEND_EQUATION
 	GL_VERTEX_ATTRIB_ARRAY_ENABLED 0x8622
 	GL_VERTEX_ATTRIB_ARRAY_SIZE 0x8623
@@ -84,7 +85,6 @@ http://www.opengl.org/documentation/specs/version2.0/glspec20.pdf
 	GL_STENCIL_BACK_REF 0x8CA3
 	GL_STENCIL_BACK_VALUE_MASK 0x8CA4
 	GL_STENCIL_BACK_WRITEMASK 0x8CA5
-	typedef char GLchar
 	void glBlendEquationSeparate (GLenum, GLenum)
 	void glDrawBuffers (GLsizei n, const GLenum* bufs)
 	void glStencilOpSeparate (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass)
@@ -115,11 +115,11 @@ http://www.opengl.org/documentation/specs/version2.0/glspec20.pdf
 	void glGetVertexAttribdv (GLuint, GLenum, GLdouble*)
 	void glGetVertexAttribfv (GLuint, GLenum, GLfloat*)
 	void glGetVertexAttribiv (GLuint, GLenum, GLint*)
-	void glGetVertexAttribPointerv (GLuint, GLenum, GLvoid*)
+	void glGetVertexAttribPointerv (GLuint, GLenum, GLvoid**)
 	GLboolean glIsProgram (GLuint program)
 	GLboolean glIsShader (GLuint shader)
 	void glLinkProgram (GLuint program)
-	void glGetShaderSource (GLint obj, GLsizei maxLength, GLsizei* length, GLchar* source)
+	void glGetShaderSource (GLuint obj, GLsizei maxLength, GLsizei* length, GLchar* source)
 	void glUseProgram (GLuint program)
 	void glUniform1f (GLint location, GLfloat v0)
 	void glUniform1fv (GLint location, GLsizei count, const GLfloat* value)

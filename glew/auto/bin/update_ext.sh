@@ -42,6 +42,30 @@ if [ ! -d $1 ] ; then
     grep -v glGetIntegerIndexedvEXT $1/GL_EXT_transform_feedback > tmp
     mv tmp $1/GL_EXT_transform_feedback    
 
+# remove duplicates from GL_NV_video_capture and GLX_NV_video_capture
+    grep -v glX $1/GL_NV_video_capture > tmp
+    mv tmp $1/GL_NV_video_capture
+
+# add missing functions to GL_NV_video_capture
+	cat >> $1/GL_NV_video_capture <<EOT
+    void glGetVideoCaptureStreamivNV (GLuint video_capture_slot, GLuint stream, GLenum pname, GLint* params)
+    void glGetVideoCaptureStreamfvNV (GLuint video_capture_slot, GLuint stream, GLenum pname, GLfloat* params)
+    void glGetVideoCaptureStreamdvNV (GLuint video_capture_slot, GLuint stream, GLenum pname, GLdouble* params)
+    void glVideoCaptureStreamParameterivNV (GLuint video_capture_slot, GLuint stream, GLenum pname, const GLint* params)
+    void glVideoCaptureStreamParameterfvNV (GLuint video_capture_slot, GLuint stream, GLenum pname, const GLfloat* params)
+    void glVideoCaptureStreamParameterdvNV (GLuint video_capture_slot, GLuint stream, GLenum pname, const GLdouble* params)
+EOT
+
+# fix WGL_NV_video_capture
+    cat >> $1/WGL_NV_video_capture <<EOT
+    DECLARE_HANDLE(HVIDEOINPUTDEVICENV);
+EOT
+
+# fix GLX_NV_video_capture
+    cat >> $1/GLX_NV_video_capture <<EOT
+    typedef XID GLXVideoCaptureDeviceNV
+EOT
+
 # remove duplicates from GL_NV_present_video and GLX_NV_present_video
     grep -v -F -f $1/GLX_NV_present_video $1/GL_NV_present_video > tmp
     mv tmp $1/GL_NV_present_video
@@ -234,15 +258,20 @@ EOT
 	GL_MAX_SAMPLES_EXT 0x8D57
 EOT
 
-# fix const correctness in GL_ARB_shader_objects
-#    perl -e 's/(.+glUniform.*(fv|iv).+)(GLfloat\*.+|GLint\*.+)/\1const \3/;' -pi $1/GL_ARB_shader_objects
+# Filter out GL_NV_gpu_program_fp64 enums and functions
+    head -n3 $1/GL_NV_gpu_program_fp64 > tmp
+    mv tmp $1/GL_NV_gpu_program_fp64
+
+# Filter glGetUniformui64vNV from GL_NV_shader_buffer_load
+    grep -v "glGetUniformui64vNV" $1/GL_NV_shader_buffer_load > tmp
+    mv tmp $1/GL_NV_shader_buffer_load
 
 # Filter out profile enumerations from GLX_ARB_create_context
     grep -v "_PROFILE_" $1/GLX_ARB_create_context > tmp
     mv tmp $1/GLX_ARB_create_context
 
 # Filter only profile related enumerations for GLX_ARB_create_context_profile
-    head -n2 $1/GLX_ARB_create_context_profile > tmp
+    head -n3 $1/GLX_ARB_create_context_profile > tmp
     grep "_PROFILE_" $1/GLX_ARB_create_context_profile >> tmp
     mv tmp $1/GLX_ARB_create_context_profile
 
@@ -251,7 +280,7 @@ EOT
     mv tmp $1/WGL_ARB_create_context
 
 # Filter only profile related enumerations for WGL_ARB_create_context_profile
-    head -n2 $1/WGL_ARB_create_context_profile > tmp
+    head -n3 $1/WGL_ARB_create_context_profile > tmp
     grep "_PROFILE_" $1/WGL_ARB_create_context_profile >> tmp
     mv tmp $1/WGL_ARB_create_context_profile
 
@@ -263,6 +292,54 @@ EOT
 # add missing function to WGL_NV_copy_image
 	cat >> $1/WGL_NV_copy_image <<EOT
   BOOL wglCopyImageSubDataNV (HGLRC hSrcRC, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, HGLRC hDstRC, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei width, GLsizei height, GLsizei depth)
+EOT
+
+# Filter glProgramParameteri from GL_ARB_separate_shader_objects
+#    grep -v "glProgramParameteri" $1/GL_ARB_separate_shader_objects > tmp
+#    mv tmp $1/GL_ARB_separate_shader_objects
+
+# Filter out EXT functions from GL_ARB_viewport_array
+    grep -v "EXT" $1/GL_ARB_viewport_array > tmp
+    mv tmp $1/GL_ARB_viewport_array
+
+# Additional enumerations for GL_NV_vertex_buffer_unified_memory
+# These are mentioned in GL_ARB_draw_indirect.txt
+
+    cat >> $1/GL_NV_vertex_buffer_unified_memory <<EOT
+	GL_DRAW_INDIRECT_UNIFIED_NV 0x8F40
+	GL_DRAW_INDIRECT_ADDRESS_NV 0x8F41
+	GL_DRAW_INDIRECT_LENGTH_NV  0x8F42
+EOT
+
+# Filter glGetPointerv from GL_ARB_debug_output
+# It's part of OpenGL 1.1, after all
+
+    grep -v "glGetPointerv" $1/GL_ARB_debug_output > tmp
+    mv tmp $1/GL_ARB_debug_output
+
+# Filter glGetPointerv from GL_EXT_vertex_array
+# It's part of OpenGL 1.1, after all
+
+    grep -v "glGetPointerv" $1/GL_EXT_vertex_array > tmp
+    mv tmp $1/GL_EXT_vertex_array
+
+# add typedef to GL_AMD_debug_output
+# parse_spec.pl can't parse typedefs from New Types section, but ought to
+    cat >> $1/GL_AMD_debug_output <<EOT
+	typedef void (APIENTRY *GLDEBUGPROCAMD)(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+EOT
+
+# add typedef to GL_ARB_debug_output
+# parse_spec.pl can't parse typedefs from New Types section, but ought to
+    cat >> $1/GL_ARB_debug_output <<EOT
+	typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+EOT
+
+# add typedefs to GL_ARB_cl_event
+# parse_spec.pl can't parse typedefs from New Types section, but ought to
+    cat >> $1/GL_ARB_cl_event <<EOT
+	typedef struct _cl_context *cl_context
+	typedef struct _cl_event *cl_event
 EOT
 
 # clean up

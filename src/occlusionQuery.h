@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -18,13 +18,13 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 //
-// occlusionQueryAdapter.h 
+// occlusionQuery.h
 //
 // wrappers parts of different occlusion-query extensions conveniently
 //
 
-#ifndef __OpenCSG__occlusion_query_adapter_h__
-#define __OpenCSG__occlusion_query_adapter_h__
+#ifndef __OpenCSG__occlusion_query_h__
+#define __OpenCSG__occlusion_query_h__
 
 #include "opencsgConfig.h"
 
@@ -42,6 +42,9 @@ namespace OpenCSG {
             virtual void endQuery() = 0;
             /// returns the number of fragments that have been put into
             /// the frame buffer between beginQuery() and endQuery().
+            /// if the parameter exactNumberNeeded of getOcclusionQuery()
+            /// is false, the return value is just 0 or 1, depending
+            /// whether any fragment has been rendered or not.
             virtual unsigned int getQueryResult() = 0;
 
         protected:
@@ -54,12 +57,12 @@ namespace OpenCSG {
         ///
         /// when the occlusion query object is not needed anymore,
         /// it must be deleted!
-        OcclusionQuery* getOcclusionQuery();
+        OcclusionQuery* getOcclusionQuery(bool exactNumberNeeded);
 
     } // namespace OpenGL
 
 } // namespace OpenCSG
 
-#endif // __OpenCSG__occlusion_query_adapter_h__
+#endif // __OpenCSG__occlusion_query_h__
 
 

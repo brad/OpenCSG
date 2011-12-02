@@ -1,5 +1,6 @@
 GL_VERSION_3_0
 http://www.opengl.org/registry/doc/glspec30.20080811.pdf
+
 	GL_COMPARE_REF_TO_TEXTURE GL_COMPARE_R_TO_TEXTURE_ARB
 	GL_CLIP_DISTANCE0 GL_CLIP_PLANE0
 	GL_CLIP_DISTANCE1 GL_CLIP_PLANE1
@@ -116,7 +117,7 @@ http://www.opengl.org/registry/doc/glspec30.20080811.pdf
 	void glBeginTransformFeedback (GLenum)
 	void glEndTransformFeedback (void)
 	void glTransformFeedbackVaryings (GLuint, GLsizei, const GLchar **, GLenum)
-	void glGetTransformFeedbackVarying (GLuint, GLuint, GLint*)
+	void glGetTransformFeedbackVarying (GLuint, GLuint, GLsizei, GLsizei *, GLsizei *, GLenum *, GLchar *)
 	void glClampColor (GLenum, GLenum)
 	void glBeginConditionalRender (GLuint, GLenum)
 	void glEndConditionalRender (void)

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2006-2010, Florian Kirsch
+// Copyright (C) 2006-2011, Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -22,8 +22,6 @@
 
 #include "opencsgConfig.h"
 #include "frameBufferObject.h"
-#include <cassert>
-#include <iostream>
 
 namespace OpenCSG {
 
@@ -36,6 +34,7 @@ namespace OpenCSG {
             textureID(0),
             depthID(0),
             framebufferID(0),
+            oldFramebufferID(0),
             initialized(false)
         {
         }
@@ -59,12 +58,19 @@ namespace OpenCSG {
             glGenRenderbuffers(1, &depthID); 
             glGenTextures(1, &textureID);
 
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFramebufferID);
             glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_INT, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+
+            GLenum target = (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle)
+                ? GL_TEXTURE_RECTANGLE_ARB
+                : GL_TEXTURE_2D; // implicitely asks for GL_ARB_texture_non_power_of_two.
+                                 // this should have been checked in channelManager.cpp
+
+            glBindTexture(target, textureID);
+            glTexImage2D(target, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_INT, 0);
+            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, textureID, 0);
 
             glBindRenderbuffer(GL_RENDERBUFFER, depthID);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, width, height);
@@ -78,10 +84,10 @@ namespace OpenCSG {
                 return false;
             }
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, oldFramebufferID);
+            glBindTexture(target, 0);
 
-            textureTarget = GL_TEXTURE_2D;
+            textureTarget = target;
 
             initialized = true;
 
@@ -135,14 +141,14 @@ namespace OpenCSG {
         // Unbinds frame buffer texture.
         bool FrameBufferObject::EndCapture()
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, oldFramebufferID);
             return true;
         }
 
         // Sets the frame buffer texture as active texture object.
         void FrameBufferObject::Bind() const
         {
-            glBindTexture(GL_TEXTURE_2D, textureID);
+            glBindTexture(textureTarget, textureID);
         }
 
     } // namespace OpenGL

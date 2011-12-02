@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -25,7 +25,7 @@
 #include <GL/glew.h>
 #ifdef _WIN32
 #include <GL/wglew.h>
-#else
+#elif !defined(__APPLE__)
 #include <GL/glxew.h>
 #endif
 
@@ -102,6 +102,11 @@ namespace OpenCSG {
         glDisable(GL_LIGHTING);
         glDisable(GL_TEXTURE_1D);
         glDisable(GL_TEXTURE_2D);
+        if (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle)
+            glDisable(GL_TEXTURE_RECTANGLE_ARB);
+        glDisable(GL_TEXTURE_3D); // OpenGL 1.2 - take this as given
+        if (GL_ARB_texture_cube_map)
+            glDisable(GL_TEXTURE_CUBE_MAP_ARB);
         glDisable(GL_BLEND);
 
         glGetIntegerv(GL_FRONT_FACE, &FaceOrientation);
@@ -127,12 +132,68 @@ namespace OpenCSG {
             return false;
         gInUse = true;
 
+        OffscreenType newOffscreenType = static_cast<OffscreenType>(getOption(OffscreenSetting));
+
+        if (   newOffscreenType == OpenCSG::AutomaticOffscreenType
+            || newOffscreenType == OpenCSG::FrameBufferObject
+        ) {
+            if (GLEW_ARB_framebuffer_object) {
+                newOffscreenType = OpenCSG::FrameBufferObjectARB;
+            }
+            else
+            if (   GLEW_EXT_framebuffer_object
+                && GLEW_EXT_packed_depth_stencil
+            ) {
+                newOffscreenType = OpenCSG::FrameBufferObjectEXT;
+            }
+            else
+            if (newOffscreenType == OpenCSG::AutomaticOffscreenType
+#ifndef OPENCSG_HAVE_PBUFFER
+                && false
+#else
+#ifdef WIN32
+                && WGLEW_ARB_pbuffer
+                && WGLEW_ARB_pixel_format
+#elif !defined(__APPLE__)
+                && GLXEW_SGIX_pbuffer
+                && GLXEW_SGIX_fbconfig
+#else
+                && false
+#endif
+#endif // OPENCSG_HAVE_PBUFFER
+            ) {
+                newOffscreenType = OpenCSG::PBuffer;
+            }
+            else {
+                // At least one set of the above OpenGL extensions is required
+                return false;
+            }
+        }
+
+        gOffscreenBuffer = OpenGL::getOffscreenBuffer(newOffscreenType);
+
+        if (!gOffscreenBuffer) {
+            // Creating the offscreen buffer failed, maybe the OpenGL extension
+            // for the specific offscreen buffer type is not supported
+            return false;
+        }
+
         const int dx = OpenGL::canvasPos[2] - OpenGL::canvasPos[0];
         const int dy = OpenGL::canvasPos[3] - OpenGL::canvasPos[1];
 
         int tx = dx;
         int ty = dy;
-        if (!GLEW_NV_texture_rectangle) {
+        // We don't need to enlarge the texture to the next largest power-of-two size if:
+        // - any of the texture rectangle extensions is supported
+        //   (texture rectangle is no problem for FBO; for pbuffers we fallback to copy-to-texture
+        //    if the required WGL-extensions for texture rectangle are missing - always on Linux)
+        // - Otherwise for FBO, if we have the GLEW_ARB_texture_non_power_of_two extension
+        // Negating this gives the following expression from hell:
+        if (   !GLEW_ARB_texture_rectangle
+            && !GLEW_EXT_texture_rectangle
+            && !GLEW_NV_texture_rectangle
+            && (newOffscreenType == OpenCSG::PBuffer || !GLEW_ARB_texture_non_power_of_two)
+        ) {
             // blow up the texture to legal power-of-two size :-(
             tx = nextPow2(dx);
             ty = nextPow2(dy);
@@ -159,45 +220,6 @@ namespace OpenCSG {
         }
 
         bool rebuild = false;
-        OffscreenType newOffscreenType = static_cast<OffscreenType>(getOption(OffscreenSetting));
-
-        if (   newOffscreenType == OpenCSG::AutomaticOffscreenType
-            || newOffscreenType == OpenCSG::FrameBufferObject
-        ) {
-            if (GLEW_ARB_framebuffer_object) {
-                newOffscreenType = OpenCSG::FrameBufferObjectARB;
-            }
-            else
-            if (newOffscreenType == OpenCSG::AutomaticOffscreenType
-#ifdef WIN32
-                && WGLEW_ARB_pbuffer
-                && WGLEW_ARB_pixel_format
-#else
-                && GLXEW_SGIX_pbuffer
-                && GLXEW_SGIX_fbconfig
-#endif
-            ) {
-                newOffscreenType = OpenCSG::PBuffer;
-            }
-            else 
-            if (   GLEW_EXT_framebuffer_object
-                && GLEW_EXT_packed_depth_stencil
-            ) {
-                newOffscreenType = OpenCSG::FrameBufferObjectEXT;
-            }
-            else {
-                // At least one set of the above OpenGL extensions is required
-                return false;
-            }
-        }
-
-        gOffscreenBuffer = OpenGL::getOffscreenBuffer(newOffscreenType);
-
-        if (!gOffscreenBuffer) {
-            // Creating the offscreen buffer failed, maybe the OpenGL extension
-            // for the specific offscreen buffer type is not supported
-            return false;
-        }
 
         if (!gOffscreenBuffer->IsInitialized()) {
             if (!gOffscreenBuffer->Initialize(sizeX.getMax(), sizeY.getMax(), true, false)) {

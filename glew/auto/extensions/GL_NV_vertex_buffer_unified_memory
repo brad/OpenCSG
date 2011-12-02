@@ -1,5 +1,6 @@
 GL_NV_vertex_buffer_unified_memory
 http://www.opengl.org/registry/specs/NV/vertex_buffer_unified_memory.txt
+GL_NV_vertex_buffer_unified_memory
 	GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV 0x8F1E
 	GL_ELEMENT_ARRAY_UNIFIED_NV 0x8F1F
 	GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV 0x8F20
@@ -34,3 +35,6 @@ http://www.opengl.org/registry/specs/NV/vertex_buffer_unified_memory.txt
 	void glVertexAttribFormatNV (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride)
 	void glVertexAttribIFormatNV (GLuint index, GLint size, GLenum type, GLsizei stride)
 	void glVertexFormatNV (GLint size, GLenum type, GLsizei stride)
+	GL_DRAW_INDIRECT_UNIFIED_NV 0x8F40
+	GL_DRAW_INDIRECT_ADDRESS_NV 0x8F41
+	GL_DRAW_INDIRECT_LENGTH_NV  0x8F42

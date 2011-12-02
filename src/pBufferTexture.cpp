@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2006-2010, Florian Kirsch
+// Copyright (C) 2006-2011, Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -21,6 +21,9 @@
 //
 
 #include "opencsgConfig.h"
+
+#ifdef OPENCSG_HAVE_PBUFFER
+
 #include "pBufferTexture.h"
 #include "RenderTexture/RenderTexture.h"
 #include <GL/glew.h>
@@ -33,9 +36,9 @@ namespace OpenCSG {
     namespace OpenGL {
 
         PBufferTexture::PBufferTexture() {
-            if (GLEW_NV_texture_rectangle) {
+            if (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle) {
 #ifdef _WIN32
-                if (WGLEW_ARB_render_texture) {
+                if (WGLEW_ARB_render_texture && (WGLEW_ATI_render_texture_rectangle || WGLEW_NV_render_texture_rectangle)) {
                     s = "rgba texRECT depth=24 stencil=8 single rtt";
                 } else
 #endif
@@ -112,3 +115,4 @@ namespace OpenCSG {
 
 } // namespace OpenCSG
 
+#endif // OPENCSG_HAVE_PBUFFER

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2010, Florian Kirsch
+// Copyright (C) 2010-2011, Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -22,8 +22,6 @@
 
 #include "opencsgConfig.h"
 #include "frameBufferObjectExt.h"
-#include <cassert>
-#include <iostream>
 
 namespace OpenCSG {
 
@@ -36,6 +34,7 @@ namespace OpenCSG {
             textureID(0),
             depthID(0),
             framebufferID(0),
+            oldFramebufferID(0),
             initialized(false)
         {
         }
@@ -60,15 +59,22 @@ namespace OpenCSG {
             glGenRenderbuffersEXT(1, &depthID); 
             glGenTextures(1, &textureID);
 
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);	
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_INT, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureID, 0);
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &oldFramebufferID);
+            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);
+
+            GLenum target = (GLEW_ARB_texture_rectangle || GLEW_EXT_texture_rectangle || GLEW_NV_texture_rectangle)
+                ? GL_TEXTURE_RECTANGLE_ARB
+                : GL_TEXTURE_2D; // implicitely asks for GL_ARB_texture_non_power_of_two.
+                                 // this should have been checked in channelManager.cpp
+
+            glBindTexture(target, textureID);
+            glTexImage2D(target, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_INT, 0);
+            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, textureID, 0);
 
             glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthID);
-            glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_NV, width, height);
+            glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, width, height);
             glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthID);
             glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthID);
 
@@ -79,10 +85,10 @@ namespace OpenCSG {
                 return false;
             }
 
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, oldFramebufferID);
+            glBindTexture(target, 0);
 
-            textureTarget = GL_TEXTURE_2D;
+            textureTarget = target;
 
             initialized = true;
 
@@ -136,14 +142,14 @@ namespace OpenCSG {
         // Unbinds frame buffer texture.
         bool FrameBufferObjectExt::EndCapture()
         {
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, oldFramebufferID);
             return true;
         }
 
         // Sets the frame buffer texture as active texture object.
         void FrameBufferObjectExt::Bind() const
         {
-            glBindTexture(GL_TEXTURE_2D, textureID);
+            glBindTexture(textureTarget, textureID);
         }
 
     } // namespace OpenGL

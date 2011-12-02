@@ -21,7 +21,7 @@ sub make_define($$)
 # type declaration
 sub make_type($$)
 {
-    return "typedef $_[1] $_[0];"
+    return "@_;"
 }
 
 # function pointer type declaration
@@ -52,7 +52,7 @@ if (@ARGV)
 
 	foreach my $ext (sort @extlist)
 	{
-		my ($extname, $exturl, $types, $tokens, $functions, $exacts) = parse_ext($ext);
+		my ($extname, $exturl, $extstring, $types, $tokens, $functions, $exacts) = parse_ext($ext);
 
 		make_separator($extname);
 		print "#ifndef $extname\n#define $extname 1\n";

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -31,13 +31,13 @@ namespace OpenCSG {
 
         GLfloat projection[16];
         GLfloat modelview[16];
-        int canvasPos[4];
+        GLint canvasPos[4];
 
-        int stencilBits = 0;
+        GLint stencilBits = 0;
         int stencilMax = 0;
         int stencilMask = 0;
 
-        int scissorPos[4];
+        GLint scissorPos[4];
 
         void scissor(const PCArea& area) {
             const int dx = area.maxx - area.minx;

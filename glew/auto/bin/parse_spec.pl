@@ -66,6 +66,16 @@ my %typemap = (
     uint64 => "GLuint64",
     sync   => "GLsync",
 
+    # AMD_debug_output
+
+    DEBUGPROCAMD => "GLDEBUGPROCAMD",
+
+    # ARB_debug_output
+
+    DEBUGPROCARB => "GLDEBUGPROCARB",
+
+    vdpauSurfaceNV => "GLvdpauSurfaceNV",
+    
     # GLX 1.3 defines new types which might not be available at compile time
 
     #GLXFBConfig   => "void*",
@@ -125,11 +135,12 @@ my %fnc_ignore_list = (
 my %regex = (
     eofnc    => qr/(?:\);?$|^$)/, # )$ | );$ | ^$
     extname  => qr/^[A-Z][A-Za-z0-9_]+$/,
+    none     => qr/^\(none\)$/,
     function => qr/^(.+) ([a-z][a-z0-9_]*) \((.+)\)$/i,
     prefix   => qr/^(?:[aw]?gl|glX)/, # gl | agl | wgl | glX
     tprefix  => qr/^(?:[AW]?GL|GLX)_/, # GL_ | AGL_ | WGL_ | GLX_
     section  => compile_regex('^(', join('|', @sections), ')$'), # sections in spec
-    token    => qr/^([A-Z0-9][A-Z0-9_]*):?\s+((?:0x)?[0-9A-F]+)(.*)$/, # define tokens
+    token    => qr/^([A-Z0-9][A-Z0-9_x]*):?\s+((?:0x)?[0-9A-F]+)(.*)$/, # define tokens
     types    => compile_regex('\b(', join('|', keys %typemap), ')\b'), # var types
     voidtype => compile_regex('\b(', keys %voidtypemap, ')\b '), # void type
 );
@@ -181,7 +192,13 @@ sub parse_spec($)
 
         "Name Strings" => sub {
             # Add extension name to extension list
-            # Does this look even plausible?
+        
+           # Initially use $extname if (none) specified
+            if (/$regex{none}/)
+            {
+                $_ = $extname;
+            }
+
             if (/$regex{extname}/)
             {
                 # prefix with "GL_" if prefix not present
@@ -301,10 +318,11 @@ foreach my $spec (sort @speclist)
     {
         my $info = "$ext_dir/" . $ext;
         open EXT, ">$info";
-        print EXT $ext . "\n";
-		my $specname = $spec;
-		$specname =~ s/registry\///;
-        print EXT $reg_http . $specname . "\n";
+        print EXT $ext . "\n";                       # Extension name
+        my $specname = $spec;
+        $specname =~ s/registry\///;
+        print EXT $reg_http . $specname . "\n";      # Extension info URL
+        print EXT $ext . "\n";                       # Extension string
 
         my $prefix = $ext;
         $prefix =~ s/^(.+?)(_.+)$/$1/;

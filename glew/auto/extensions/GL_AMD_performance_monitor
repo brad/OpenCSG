@@ -1,5 +1,6 @@
 GL_AMD_performance_monitor
 http://www.opengl.org/registry/specs/AMD/performance_monitor.txt
+GL_AMD_performance_monitor
 	GL_UNSIGNED_INT 0x1405
 	GL_FLOAT 0x1406
 	GL_COUNTER_TYPE_AMD 0x8BC0

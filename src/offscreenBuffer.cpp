@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2006-2010, Florian Kirsch
+// Copyright (C) 2006-2011, Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -34,10 +34,16 @@ namespace OpenCSG {
     namespace OpenGL {
 
         struct ContextData {
-            ContextData() : fARB(0), fEXT(0), pBuf(0) {}
+            ContextData() : fARB(0), fEXT(0)
+#ifdef OPENCSG_HAVE_PBUFFER
+                          , pBuf(0)
+#endif
+          {}
             FrameBufferObject* fARB;
             FrameBufferObjectExt* fEXT;
+#ifdef OPENCSG_HAVE_PBUFFER
             PBufferTexture* pBuf;
+#endif
         };
 
         static std::map<int, ContextData> gContextDataMap;
@@ -56,11 +62,13 @@ namespace OpenCSG {
                     contextData.fEXT = new FrameBufferObjectExt;
                 return contextData.fEXT;
             }
+#ifdef OPENCSG_HAVE_PBUFFER
             else if (type == OpenCSG::PBuffer) {
                 if (!contextData.pBuf)
                     contextData.pBuf = new PBufferTexture;
                 return contextData.pBuf;
             }
+#endif
 
             return 0;
         }
@@ -71,7 +79,9 @@ namespace OpenCSG {
             if (itr != gContextDataMap.end()) {
                 delete itr->second.fARB;
                 delete itr->second.fEXT;
+#ifdef OPENCSG_HAVE_PBUFFER
                 delete itr->second.pBuf;
+#endif
                 gContextDataMap.erase(itr);
             }
         }

@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2002-2010, Florian Kirsch,
+// Copyright (C) 2002-2011, Florian Kirsch,
 // Hasso-Plattner-Institute at the University of Potsdam, Germany
 //
 // This library is free software; you can redistribute it and/or 
@@ -18,7 +18,7 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 //
-// occlusionQueryAdapter.cpp
+// occlusionQuery.cpp
 //
 
 #include "opencsgConfig.h"
@@ -39,10 +39,12 @@ namespace OpenCSG {
             virtual unsigned int getQueryResult();
 
         private:
+            friend OcclusionQuery* getOcclusionQuery(bool exactNumberNeeded);
+            GLenum mQueryType;
             GLuint mQueryObject;
         };
 
-        OcclusionQueryARB::OcclusionQueryARB() {
+        OcclusionQueryARB::OcclusionQueryARB() : mQueryType(GL_SAMPLES_PASSED_ARB) {
             glGenQueriesARB(1, &mQueryObject);
         }
 
@@ -51,15 +53,15 @@ namespace OpenCSG {
         }
 
         void OcclusionQueryARB::beginQuery() {
-            glBeginQueryARB(GL_SAMPLES_PASSED_ARB, mQueryObject);
+            glBeginQueryARB(mQueryType, mQueryObject);
         }
 
         void OcclusionQueryARB::endQuery() {
-            glEndQueryARB(GL_SAMPLES_PASSED_ARB);
+            glEndQueryARB(mQueryType);
         }
 
         unsigned int OcclusionQueryARB::getQueryResult() {
-            unsigned int fragmentCount;
+            GLuint fragmentCount;
             glGetQueryObjectuivARB(mQueryObject, GL_QUERY_RESULT_ARB, &fragmentCount);
             return fragmentCount;
         }
@@ -96,16 +98,25 @@ namespace OpenCSG {
         }
 
         unsigned int OcclusionQueryNV::getQueryResult() {
-            unsigned int fragmentCount;
+            GLuint fragmentCount;
             glGetOcclusionQueryuivNV(mQueryObject, GL_PIXEL_COUNT_NV, &fragmentCount);
             return fragmentCount;
         }
 
 
 
-        OcclusionQuery* getOcclusionQuery() {
+        OcclusionQuery* getOcclusionQuery(bool exactNumberNeeded) {
+
+            if (!exactNumberNeeded && GLEW_ARB_occlusion_query2) {
+                OcclusionQueryARB* occlusionQuery = new OcclusionQueryARB;
+                occlusionQuery->mQueryType = GL_ANY_SAMPLES_PASSED;
+                return occlusionQuery;
+            }
+
             if (GLEW_ARB_occlusion_query) {
-                return new OcclusionQueryARB;
+                OcclusionQueryARB* occlusionQuery = new OcclusionQueryARB;
+                occlusionQuery->mQueryType = GL_SAMPLES_PASSED_ARB;
+                return occlusionQuery;
             }
 
             if (GLEW_NV_occlusion_query) {

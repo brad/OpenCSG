@@ -1,5 +1,6 @@
 GL_EXT_vertex_array
 http://www.opengl.org/registry/specs/EXT/vertex_array.txt
+GL_EXT_vertex_array
 	GL_DOUBLE_EXT 0x140A
 	GL_VERTEX_ARRAY_EXT 0x8074
 	GL_NORMAL_ARRAY_EXT 0x8075
@@ -37,7 +38,6 @@ http://www.opengl.org/registry/specs/EXT/vertex_array.txt
 	void glColorPointerEXT (GLint size, GLenum type, GLsizei stride, GLsizei count, const void* pointer)
 	void glDrawArraysEXT (GLenum mode, GLint first, GLsizei count)
 	void glEdgeFlagPointerEXT (GLsizei stride, GLsizei count, const GLboolean* pointer)
-	void glGetPointervEXT (GLenum pname, void** params)
 	void glIndexPointerEXT (GLenum type, GLsizei stride, GLsizei count, const void* pointer)
 	void glNormalPointerEXT (GLenum type, GLsizei stride, GLsizei count, const void* pointer)
 	void glTexCoordPointerEXT (GLint size, GLenum type, GLsizei stride, GLsizei count, const void* pointer)

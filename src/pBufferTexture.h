@@ -1,5 +1,5 @@
 // OpenCSG - library for image-based CSG rendering for OpenGL
-// Copyright (C) 2006-2010, Florian Kirsch
+// Copyright (C) 2006-2011, Florian Kirsch
 //
 // This library is free software; you can redistribute it and/or 
 // modify it under the terms of the GNU General Public License, 
@@ -27,6 +27,8 @@
 
 #include "opencsgConfig.h"
 #include "offscreenBuffer.h"
+
+#ifdef OPENCSG_HAVE_PBUFFER
 
 class RenderTexture;
 
@@ -87,4 +89,6 @@ namespace OpenCSG {
 
 } // namespace OpenCSG
 
-#endif // __OpenCSG__frame_buffer_object_h__
+#endif // OPENCSG_HAVE_PBUFFER
+
+#endif // __OpenCSG__pbuffer_texture_h__
